@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .main {
+            background-color: #f2f3f4;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 10px;
+        }
+        .box {
+            width: 150px;
+            height: 159px;
+            border: 1px solid #ccc;
+            margin: 10px;
+            background-color:white;
+            font-size: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.6s;
+            box-sizing: border-box;
+
+        }
+        .box:first-child:hover {
+            background-color: #000;
+            color: #fff;
+            font-size: 100px;
+            border-width: 10px;
+        }
+        .box:nth-child(2):hover {
+            box-shadow:10px 10px 20px #181616;
+        }
+        .box:nth-child(3):hover {
+            text-shadow: 100px 10px 20px #181616;
+        }
+        .box:nth-of-type(4):hover {
+            border-radius: 50%;
+        }
+        .box:nth-of-type(5) {
+            /* 线性渐变 */
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        .box:nth-of-type(6) {
+            /* 径向渐变 */
+            background: radial-gradient(#fff, #000);  
+        }
+        .box:nth-of-type(6)+.box:hover {
+            transform: scale(1.1);
+        }
+        .box:nth-of-type(8):hover {
+            transform: translate(-100px);
+        }
+        .box:nth-of-type(9):hover {
+            transform: rotate(-180deg);
+        }
+        .box:nth-of-type(10):hover {
+            transform: skew(-45deg);
+        }
+        .box:nth-last-child(2):hover::before {  
+            content: "#";
+            color: #ff0000;
+        }
+        .box:last-child:hover::after {
+            content: "张珑恩";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 50px;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background-color: #000;
+            color: #fff;
+            font-size: 20px;
+            box-sizing: border-box;
+        }
+        .box:nth-last-child(3n):hover::after {
+            
+            border:3px solid #f00;
+        }
+        /*拓展：鼠标在偶数个盒子上时有变化，变化效果自定义。*/
+        .box:nth-child(even):hover {
+            background-color: #ff0000;
+            color: #fff;
+            font-size: 100px;
+            border-width: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="box">1</div>
+    <div class="box">2</div>
+    <div class="box">3</div>
+    <div class="box">4</div>
+    <div class="box">5</div>
+    <div class="box">6</div>
+    <div class="box">7</div>
+    <div class="box">8</div>
+    <div class="box">9</div>
+    <div class="box">10</div>
+    <div class="box">11</div>
+    <div class="box">12</div>
+    </div>
+</body>
+</html>

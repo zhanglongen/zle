@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h2,h3,p{
+            padding:0;
+            margin:0;
+        }
+        #box{
+    width:480px;
+    padding:8px;
+    border:1px solid #ccc;
+    font-size:12px;
+    margin:20px;
+}
+#box h3{
+    font-size:16px;
+    /* 居中 */
+    text-align:center;
+    /* 行高33px */
+    line-height:33px;
+    /* 字间距3px */
+    letter-spacing:3px;
+    color:#036;
+}
+#box p{
+    /* 行高150% */
+    line-height:150%;
+    color:#666;
+    /* 首行缩进2em */
+    text-indent:2em;
+}
+#box a{
+    color:#f11;
+    text-decoration:none;
+    /*加粗*/
+    font-weight:bold;   
+}
+
+#box .stu-num {
+    color: #1f66d8;
+    font-weight: bold;
+}
+
+#box .yname {
+    color: #1d1d1d;
+    font-weight: bold;
+}
+
+#box .difficulty {
+    color: #e53935;
+    font-weight: bold;
+}
+
+#box .knowledge {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid #a64dff;
+    background-color: #f6ebff;
+    color: #7a2ccf;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+    </style>
+</head>
+<body>
+    <h2>css进阶</h2>
+    <div id="box">
+        <h3>CSS那些事</h3>
+        <p>
+            学号:<span class="stu-num">418</span>，姓名:<span class="yname">张珑恩</span>，<span>班级</span>计算机24006，难度:<span class="difficulty">★★★☆☆</span>，对于《高级网页设计》的这个例子对应的知识点是：
+            <span class="knowledge">群组选择器、后代选择器、层叠与继承</span>。
+            <a href="#">更多>></a>
+        </p>
+    </div>
+    <!--扩展：学号:蓝色加粗;姓名:深色加粗,难度的值:红色加粗,
+    知识点:紫色边框,边框为额外内容,使用内部css-->
+</body>
+</html>

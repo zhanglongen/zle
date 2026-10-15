@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flex Layout Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #e7e7e7;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+        }
+
+        .stage {
+            width: 100%;
+            height: 260px;
+            display: flex;
+            background: #efefef;
+            border-top: 1px solid #666;
+            border-bottom: 1px solid #666;
+        }
+
+        .panel {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            border-right: 1px solid #666;
+            background: #f3f3f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .panel:first-child {
+            border-left: 1px solid #666;
+        }
+
+        .item {
+            background: #d9d9d9;
+            border: 1px solid #2d2d2d;
+        }
+
+        .panel1 .item {
+            background: #cfcfcf;
+        }
+
+        .panel2 .top {
+            background: #b9d6f2;
+        }
+
+        .panel2 .bottom {
+            background: #d9d6f7;
+        }
+
+        .panel3 .grid .item {
+            background: #cfe9d8;
+        }
+
+        .panel3 .grid .item:nth-child(2) {
+            background: #f7d7c7;
+        }
+
+        .panel3 .grid .item:nth-child(3) {
+            background: #f5e7a6;
+        }
+
+        .panel3 .grid .item:nth-child(4) {
+            background: #d3d9f7;
+        }
+
+        .panel4 .top {
+            background: #f7c8d9;
+        }
+
+        .panel4 .bottom .item:first-child {
+            background: #bfe7dc;
+        }
+
+        .panel4 .bottom .item:last-child {
+            background: #f5d9a6;
+        }
+
+        .panel1 .item {
+            width: 120px;
+            height: 120px;
+        }
+
+        .panel2 {
+            align-items: center;
+        }
+
+        .panel2 .wrap {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .panel2 .top {
+            width: 150px;
+            height: 70px;
+        }
+
+        .panel2 .bottom {
+            width: 120px;
+            height: 90px;
+        }
+
+        .panel3 .grid {
+            width: 240px;
+            height: 170px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-content: space-between;
+        }
+
+        .panel3 .grid .item {
+            width: 90px;
+            height: 74px;
+        }
+
+        .panel4 {
+            align-items: center;
+        }
+
+        .panel4 .wrap {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .panel4 .top {
+            width: 100%;
+            height: 74px;
+        }
+
+        .panel4 .bottom {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .panel4 .bottom .item {
+            width: 92px;
+            height: 82px;
+        }
+    </style>
+</head>
+<body>
+    <h2>张珑恩 flex</h2>
+    <div class="stage">
+        <div class="panel panel1">
+            <div class="item"></div>
+        </div>
+
+        <div class="panel panel2">
+            <div class="wrap">
+                <div class="item top"></div>
+                <div class="item bottom"></div>
+            </div>
+        </div>
+
+        <div class="panel panel3">
+            <div class="grid">
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+            </div>
+        </div>
+
+        <div class="panel panel4">
+            <div class="wrap">
+                <div class="item top"></div>
+                <div class="bottom">
+                    <div class="item"></div>
+                    <div class="item"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

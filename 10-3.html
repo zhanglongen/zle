@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#d9503f">
+    <title>视口响应 | 张珑恩</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            min-width: 20rem;
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        }
+
+        .viewport-box {
+            min-height: 100vh;
+            min-height: 100svh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 2rem;
+            color: #fff;
+            background-color: #d9503f;
+            transition: background-color 450ms ease;
+        }
+
+        .topline,
+        .bottomline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .eyebrow,
+        .viewport-label,
+        .bottomline {
+            margin: 0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .viewport-label {
+            padding: 0.55rem 0.8rem;
+            border: 0.0625rem solid rgb(255 255 255 / 55%);
+            border-radius: 999rem;
+            white-space: nowrap;
+        }
+
+        .hero {
+            align-self: center;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1.05;
+        }
+
+        .hero p {
+            max-width: 28rem;
+            margin: 1.5rem 0 0;
+            padding-left: 1rem;
+            border-left: 0.1875rem solid rgb(255 255 255 / 70%);
+            font-size: 1.125rem;
+            line-height: 1.8;
+        }
+
+        .bottomline {
+            padding-top: 1rem;
+            border-top: 0.0625rem solid rgb(255 255 255 / 45%);
+        }
+
+        @media (min-width: 40rem) {
+            html {
+                font-size: 18px;
+            }
+
+            .viewport-box {
+                padding: 3rem;
+                background-color: #18796c;
+            }
+
+            .hero h1 {
+                font-size: 6rem;
+            }
+        }
+
+        @media (min-width: 64rem) {
+            html {
+                font-size: 20px;
+            }
+
+            .viewport-box {
+                padding: 4rem;
+                background-color: #315f9c;
+            }
+
+            .hero h1 {
+                font-size: 7rem;
+            }
+
+            .viewport-label::after {
+                content: " / DESKTOP";
+            }
+        }
+
+        @media (max-width: 39.99rem) {
+            .viewport-label::after {
+                content: " / MOBILE";
+            }
+
+            .bottomline span:last-child {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .viewport-box {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="viewport-box">
+        <header class="topline">
+            <p class="eyebrow">Responsive studies · 01</p>
+            <p class="viewport-label">Viewport</p>
+        </header>
+
+        <section class="hero" aria-labelledby="page-title">
+            <h1 id="page-title">张珑恩</h1>
+            <p>以视口为画布<br>让颜色与文字随屏幕尺寸响应。</p>
+        </section>
+
+        <footer class="bottomline">
+            <span>Media query</span>
+            <span>Fluid type / rem scale</span>
+        </footer>
+    </main>
+</body>
+</html>

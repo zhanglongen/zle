@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e1220">
+    <title>CSS3 3D 动画 | 张珑恩</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            min-width: 20rem;
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            color: #eaf0ff;
+            background:
+                radial-gradient(circle at 18% 12%, rgb(94 132 255 / 25%), transparent 45%),
+                radial-gradient(circle at 86% 88%, rgb(50 198 166 / 22%), transparent 42%),
+                #0e1220;
+            font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        }
+
+        .zhang-page {
+            min-height: 100vh;
+            min-height: 100svh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 2.5rem;
+            padding: 2rem;
+        }
+
+        .zhang-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .zhang-eyebrow {
+            margin: 0;
+            color: #7f93c9;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .zhang-header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 4vw, 2.6rem);
+            font-weight: 800;
+        }
+
+        .zhang-subtitle {
+            margin: 0;
+            color: #9fb0d8;
+            font-size: 0.95rem;
+        }
+
+        .zhang-stage {
+            display: grid;
+            place-items: center;
+            perspective: 1000px;
+        }
+
+        .zhang-scene {
+            --zhang-size: clamp(150px, 34vw, 230px);
+            --zhang-half: calc(var(--zhang-size) / 2);
+            width: var(--zhang-size);
+            height: var(--zhang-size);
+            transform-style: preserve-3d;
+            animation: zhang-bob 5s ease-in-out infinite;
+        }
+
+        .zhang-cube {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: zhang-spin 14s linear infinite;
+            transform: rotateX(-22deg) rotateY(0deg);
+        }
+
+        .zhang-face {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgb(255 255 255 / 40%);
+            border-radius: 12px;
+            color: #fff;
+            font-size: clamp(1.6rem, 6vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-shadow: 0 2px 12px rgb(0 0 0 / 35%);
+            box-shadow: inset 0 0 45px rgb(0 0 0 / 28%);
+        }
+
+        .zhang-face-front {
+            background: linear-gradient(135deg, #5e84ff, #7aa9ff);
+            transform: translateZ(var(--zhang-half));
+        }
+
+        .zhang-face-back {
+            background: linear-gradient(135deg, #d65b45, #f08a72);
+            transform: rotateY(180deg) translateZ(var(--zhang-half));
+        }
+
+        .zhang-face-right {
+            background: linear-gradient(135deg, #18796c, #32c6a6);
+            transform: rotateY(90deg) translateZ(var(--zhang-half));
+        }
+
+        .zhang-face-left {
+            background: linear-gradient(135deg, #b17a27, #e0b25a);
+            transform: rotateY(-90deg) translateZ(var(--zhang-half));
+        }
+
+        .zhang-face-top {
+            background: linear-gradient(135deg, #315f9c, #5a8cc9);
+            transform: rotateX(90deg) translateZ(var(--zhang-half));
+        }
+
+        .zhang-face-bottom {
+            background: linear-gradient(135deg, #795d43, #c08a5c);
+            transform: rotateX(-90deg) translateZ(var(--zhang-half));
+        }
+
+        .zhang-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .zhang-flip {
+            height: 150px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            perspective: 900px;
+            cursor: pointer;
+        }
+
+        .zhang-flip-inner {
+            display: block;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+        }
+
+        .zhang-flip:hover .zhang-flip-inner,
+        .zhang-flip:focus-visible .zhang-flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .zhang-flip-face {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgb(255 255 255 / 22%);
+            border-radius: 16px;
+            backface-visibility: hidden;
+        }
+
+        .zhang-flip-front {
+            background: linear-gradient(160deg, #1b2340, #26325a);
+        }
+
+        .zhang-flip-back {
+            background: linear-gradient(160deg, #18796c, #32c6a6);
+            transform: rotateY(180deg);
+        }
+
+        .zhang-flip-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .zhang-flip-note {
+            color: #9fb0d8;
+            font-size: 0.8rem;
+        }
+
+        .zhang-flip-back .zhang-flip-note {
+            color: rgb(255 255 255 / 85%);
+        }
+
+        .zhang-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgb(255 255 255 / 12%);
+            color: #7f93c9;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        @keyframes zhang-spin {
+            from {
+                transform: rotateX(-22deg) rotateY(0deg);
+            }
+            to {
+                transform: rotateX(-22deg) rotateY(360deg);
+            }
+        }
+
+        @keyframes zhang-bob {
+            0%, 100% {
+                transform: translateY(-8px);
+            }
+            50% {
+                transform: translateY(8px);
+            }
+        }
+
+        @media (min-width: 40rem) {
+            .zhang-page {
+                gap: 3rem;
+                padding: 3rem;
+            }
+
+            .zhang-flip {
+                height: 170px;
+            }
+        }
+
+        @media (min-width: 64rem) {
+            html {
+                font-size: 17px;
+            }
+
+            .zhang-page {
+                padding: 4rem;
+            }
+
+            .zhang-flip {
+                height: 190px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zhang-scene,
+            .zhang-cube {
+                animation: none;
+            }
+
+            .zhang-cube {
+                transform: rotateX(-22deg) rotateY(-32deg);
+            }
+
+            .zhang-flip-inner {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="zhang-page" aria-labelledby="zhang-title">
+        <header class="zhang-header">
+            <p class="zhang-eyebrow">CSS3 3D Transforms</p>
+            <h1 id="zhang-title">张珑恩</h1>
+            <p class="zhang-subtitle">透视 perspective · 三维空间 preserve-3d · 旋转 rotate3d</p>
+        </header>
+
+        <section class="zhang-stage" aria-label="自动旋转的 CSS3 三维立方体">
+            <div class="zhang-scene">
+                <div class="zhang-cube">
+                    <div class="zhang-face zhang-face-front">前</div>
+                    <div class="zhang-face zhang-face-back">后</div>
+                    <div class="zhang-face zhang-face-right">右</div>
+                    <div class="zhang-face zhang-face-left">左</div>
+                    <div class="zhang-face zhang-face-top">上</div>
+                    <div class="zhang-face zhang-face-bottom">下</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="zhang-cards" aria-label="CSS3 三维翻转卡片">
+            <button type="button" class="zhang-flip">
+                <span class="zhang-flip-inner">
+                    <span class="zhang-flip-face zhang-flip-front">
+                        <span class="zhang-flip-title">翻转</span>
+                        <span class="zhang-flip-note">悬停 / 聚焦查看</span>
+                    </span>
+                    <span class="zhang-flip-face zhang-flip-back">
+                        <span class="zhang-flip-title">rotateY</span>
+                        <span class="zhang-flip-note">180° 翻转</span>
+                    </span>
+                </span>
+            </button>
+
+            <button type="button" class="zhang-flip">
+                <span class="zhang-flip-inner">
+                    <span class="zhang-flip-face zhang-flip-front">
+                        <span class="zhang-flip-title">双面</span>
+                        <span class="zhang-flip-note">backface-visibility</span>
+                    </span>
+                    <span class="zhang-flip-face zhang-flip-back">
+                        <span class="zhang-flip-title">隐藏背面</span>
+                        <span class="zhang-flip-note">只显示当前面</span>
+                    </span>
+                </span>
+            </button>
+
+            <button type="button" class="zhang-flip">
+                <span class="zhang-flip-inner">
+                    <span class="zhang-flip-face zhang-flip-front">
+                        <span class="zhang-flip-title">空间</span>
+                        <span class="zhang-flip-note">transform-style</span>
+                    </span>
+                    <span class="zhang-flip-face zhang-flip-back">
+                        <span class="zhang-flip-title">preserve-3d</span>
+                        <span class="zhang-flip-note">保留三维层级</span>
+                    </span>
+                </span>
+            </button>
+        </section>
+
+        <footer class="zhang-footer">
+            <span>Pure HTML &amp; CSS</span>
+            <span>3D transform demo</span>
+        </footer>
+    </main>
+</body>
+</html>

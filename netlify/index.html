@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>张珑恩的《高级网页设计》课堂实践</title>
+  <style>
+    :root {
+      --bg1: #f4f7ff;
+      --bg2: #edf7f6;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-strong: #ffffff;
+      --primary: #3d7cff;
+      --primary-deep: #224fc9;
+      --accent: #32c6a6;
+      --text: #23314d;
+      --muted: #586883;
+      --border: rgba(61, 124, 255, 0.12);
+      --shadow: 0 18px 45px rgba(49, 82, 153, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(61, 124, 255, 0.12), transparent 30%),
+        radial-gradient(circle at right center, rgba(50, 198, 166, 0.12), transparent 25%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .page {
+      width: min(1200px, calc(100% - 32px));
+      margin: 40px auto 80px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(61, 124, 255, 0.96), rgba(46, 197, 183, 0.9));
+      color: #fff;
+      border-radius: 28px;
+      padding: 42px 36px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero::before {
+      width: 240px;
+      height: 240px;
+      top: -90px;
+      right: -40px;
+    }
+
+    .hero::after {
+      width: 180px;
+      height: 180px;
+      bottom: -70px;
+      left: -35px;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2.1rem, 4vw, 4rem);
+      line-height: 1.15;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 680px;
+      font-size: 1.08rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .meta-pill {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.92rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr;
+      gap: 28px;
+      margin-top: 30px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .links-panel {
+      padding: 26px;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .link-card {
+      display: block;
+      text-decoration: none;
+      background: linear-gradient(180deg, #ffffff, #f7faff);
+      border: 1px solid rgba(61, 124, 255, 0.12);
+      border-radius: 18px;
+      padding: 18px 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 10px 24px rgba(35, 49, 77, 0.05);
+    }
+
+    .link-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 30px rgba(61, 124, 255, 0.12);
+      border-color: rgba(61, 124, 255, 0.35);
+    }
+
+    .page-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #7aa9ff);
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 18px rgba(61, 124, 255, 0.2);
+    }
+
+    .link-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.12rem;
+      color: var(--text);
+    }
+
+    .link-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .prompt-panel {
+      padding: 26px 22px;
+    }
+
+    .prompt-box {
+      background: linear-gradient(135deg, rgba(61, 124, 255, 0.05), rgba(50, 198, 166, 0.07));
+      border: 1px solid rgba(61, 124, 255, 0.12);
+      border-left: 6px solid var(--primary);
+      border-radius: 18px;
+      padding: 20px 18px;
+      margin-top: 14px;
+      line-height: 1.8;
+      color: var(--text);
+      font-size: 0.96rem;
+    }
+
+    .prompt-box strong {
+      color: var(--primary-deep);
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 860px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-top">
+        <div>
+          <span class="badge">课堂实践导航</span>
+        </div>
+      </div>
+      <h1>张珑恩的《高级网页设计》课堂实践</h1>
+      <p class="subtitle">
+        这是本学期网页设计课程中的作品集合，涵盖基础结构、CSS 样式、页面布局与交互练习，
+        展示从入门到提升的实践过程。
+      </p>
+      <div class="hero-meta">
+        <span class="meta-pill">课程主题：高级网页设计</span>
+        <span class="meta-pill">技术栈：原生 HTML + CSS</span>
+        <span class="meta-pill">页面导航：课程作业索引</span>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="panel links-panel">
+        <h2 class="section-title">作业页面目录</h2>
+        <div class="links-grid">
+          <a class="link-card" href="1.html">
+            <span class="page-index">1</span>
+            <h3>作业 1</h3>
+            <p>基础网页结构与内容展示练习。</p>
+          </a>
+
+          <a class="link-card" href="2-1.html">
+            <span class="page-index">2-1</span>
+            <h3>作业 2-1</h3>
+            <p>HTML 进阶布局与文本排版训练。</p>
+          </a>
+
+          <a class="link-card" href="2-2.html">
+            <span class="page-index">2-2</span>
+            <h3>作业 2-2</h3>
+            <p>多模块页面结构与内容分区设计。</p>
+          </a>
+
+          <a class="link-card" href="3-1.html">
+            <span class="page-index">3-1</span>
+            <h3>作业 3-1</h3>
+            <p>样式化布局与视觉层次强化。</p>
+          </a>
+
+          <a class="link-card" href="3-2.html">
+            <span class="page-index">3-2</span>
+            <h3>作业 3-2</h3>
+            <p>细化设计元素与增强界面表达力。</p>
+          </a>
+
+          <a class="link-card" href="4.1-css2.html">
+            <span class="page-index">4-1</span>
+            <h3>作业 4.1</h3>
+            <p>CSS 进阶技巧与页面美化实践。</p>
+          </a>
+
+          <a class="link-card" href="5-1.html">
+            <span class="page-index">5-1</span>
+            <h3>作业 5-1</h3>
+            <p>页面布局与样式综合练习。</p>
+          </a>
+
+          <a class="link-card" href="5-2.html">
+            <span class="page-index">5-2</span>
+            <h3>作业 5-2</h3>
+            <p>网页结构与视觉设计综合实践。</p>
+          </a>
+
+          <a class="link-card" href="6-1 flex.html">
+            <span class="page-index">6-1</span>
+            <h3>作业 6-1</h3>
+            <p>使用 Flex 布局完成页面排版。</p>
+          </a>
+
+          <a class="link-card" href="6-2.html">
+            <span class="page-index">6-2</span>
+            <h3>作业 6-2</h3>
+            <p>进一步练习灵活的网页布局。</p>
+          </a>
+
+          <a class="link-card" href="7-1.html">
+            <span class="page-index">7-1</span>
+            <h3>作业 7-1</h3>
+            <p>综合运用 HTML 与 CSS 完成页面设计。</p>
+          </a>
+          
+          <a class="link-card" href="7-2.html">
+            <span class="page-index">7-2</span>
+            <h3>作业 7-2</h3>
+            <p>课程后续页面设计与综合实践。</p>
+          </a>
+
+          <a class="link-card" href="8-1.html">
+            <span class="page-index">8-1</span>
+            <h3>作业 8-1</h3>
+            <p>课程后续页面设计与实践练习。</p>
+          </a>
+
+          <a class="link-card" href="9-1.html">
+            <span class="page-index">9-1</span>
+            <h3>作业 9-1</h3>
+            <p>课程阶段总结与网页设计实践。</p>
+          </a>
+        </div>
+      </section>
+
+      <aside class="panel prompt-panel">
+        <h2 class="section-title">本提示词</h2>
+        <div class="prompt-box">
+          <strong>提示词内容：</strong><br />
+          “创建一个新页面，包括本目录下的所有网页的超链接，使用原生代码，不使用cdn，新页面名称为index.html，主题为张珑恩的《高级网页设计》课堂实践，美化页面，页面中包括本提示词。”
+        </div>
+      </aside>
+    </main>
+
+    <div class="footer-note">Designed with pure HTML &amp; CSS • 课程实践导航页</div>
+  </div>
+</body>
+</html>

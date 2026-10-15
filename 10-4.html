@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f2efe8">
+    <title>响应式网格 | 张珑恩</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            color: #222a28;
+            background: #f2efe8;
+            font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 2rem;
+            padding: 1.25rem;
+        }
+
+        .page-header,
+        .page-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .page-header {
+            padding-bottom: 1rem;
+            border-bottom: 0.0625rem solid #c9c5bb;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 750;
+        }
+
+        .page-header p,
+        .page-footer {
+            margin: 0;
+            color: #626a65;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .tile-grid {
+            align-self: center;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .tile {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: #fff;
+            box-shadow: 0 0.5rem 1.25rem rgb(35 42 38 / 10%);
+            transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .tile:hover {
+            transform: translateY(-0.25rem);
+            box-shadow: 0 0.75rem 1.5rem rgb(35 42 38 / 16%);
+        }
+
+        .tile:nth-child(1) { background: #d65b45; }
+        .tile:nth-child(2) { background: #18796c; }
+        .tile:nth-child(3) { background: #315f9c; }
+        .tile:nth-child(4) { background: #b17a27; }
+        .tile:nth-child(5) { background: #555d47; }
+        .tile:nth-child(6) { background: #a44962; }
+        .tile:nth-child(7) { background: #3c7884; }
+        .tile:nth-child(8) { background: #795d43; }
+
+        .tile-number {
+            font-family: Georgia, serif;
+            font-size: 0.875rem;
+        }
+
+        .tile-name {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .page-footer {
+            padding-top: 1rem;
+            border-top: 0.0625rem solid #c9c5bb;
+        }
+
+        @media screen and (max-width: 39.99rem) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 40rem) and (max-width: 63.99rem) {
+            html {
+                font-size: 17px;
+            }
+
+            .page {
+                gap: 2.5rem;
+                padding: 2rem;
+            }
+
+            .tile-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media screen and (min-width: 64rem) {
+            html {
+                font-size: 18px;
+            }
+
+            .page {
+                gap: 3rem;
+                padding: 2.5rem 3.5rem;
+            }
+
+            .tile-grid {
+                grid-template-columns: repeat(8, minmax(0, 1fr));
+                gap: 1rem;
+            }
+
+            .tile {
+                padding: 1rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tile {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="page-header">
+            <h1>张珑恩</h1>
+            <p>Responsive grid</p>
+        </header>
+
+        <section class="tile-grid" aria-label="八个响应式网格盒子">
+            <article class="tile"><span class="tile-number">01</span><h2 class="tile-name">发现</h2></article>
+            <article class="tile"><span class="tile-number">02</span><h2 class="tile-name">探索</h2></article>
+            <article class="tile"><span class="tile-number">03</span><h2 class="tile-name">自然</h2></article>
+            <article class="tile"><span class="tile-number">04</span><h2 class="tile-name">设计</h2></article>
+            <article class="tile"><span class="tile-number">05</span><h2 class="tile-name">灵感</h2></article>
+            <article class="tile"><span class="tile-number">06</span><h2 class="tile-name">创作</h2></article>
+            <article class="tile"><span class="tile-number">07</span><h2 class="tile-name">连接</h2></article>
+            <article class="tile"><span class="tile-number">08</span><h2 class="tile-name">未来</h2></article>
+        </section>
+
+        <footer class="page-footer">
+            <span>Media query layout</span>
+            <span>2 / 4 / 8 columns</span>
+        </footer>
+    </main>
+</body>
+</html>
