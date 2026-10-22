@@ -12,11 +12,17 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 - `netlify/img/` — the only image assets (`1.jpeg`, `2.jpeg`, `3.jpeg`).
 
 ## Conventions (follow these)
-- **Pure/native HTML + CSS only; no CDN, no external frameworks or scripts.** This is an explicit requirement recorded in the prompt box inside `netlify/index.html`. Keep pages self-contained.
+- **Native HTML + CSS + JavaScript only; no third-party libraries, frameworks, CDN, or external scripts.** This is an explicit requirement recorded in the prompt box inside `netlify/index.html`. Keep pages self-contained.
+- **Icons:** all icons must come from the local iconfont in the `font/` directory (`font/iconfont.css` plus its font files, downloaded from iconfont.cn). Never load a CDN icon library (Font Awesome, iconfont CDN, etc.) or substitute emoji/SVG icon packs. The `font/` directory does not exist yet — add it when an icon is first needed.
+- **Data fetching:** get server-side data with the native `fetch()` API (`async`/`await`); never use AJAX libraries (jQuery, axios, etc.).
 - Keep the `<style>`-in-head pattern; do not introduce separate build steps or dependencies.
 - Responsive style: `@media` breakpoints at `40rem` / `64rem`, fluid `clamp()`/`rem` type, and a `@media (prefers-reduced-motion: reduce)` fallback for any animation. Semantic landmarks with `aria-label`/`aria-labelledby`.
 - `netlify/index.html` uses CSS custom properties (`:root`) for its theme — reuse them if editing it.
-- **Naming:** every CSS class name, `id`, and JS variable name must be prefixed with `zhang` (e.g. `.zhang-card`, `id="zhang-box"`, `zhangCount`).
+- **Naming:** every CSS class name, `id`, and JS variable name must be prefixed with `zle_` (e.g. `.zle_card`, `id="zle_box"`, `zleCount`). This supersedes the older `zhang` prefix used by existing pages.
+- **Header comment:** every HTML page must include a comment as the first thing inside `<head>`, in this exact shape:
+  ```html
+  <!-- 姓名：张珑恩 | 日期：2026-10-22 | 功能名称：页面功能简述 -->
+  ```
 
 ## Workflow rule: log every prompt first
 Before executing any user request, **append** it to `zhang prompt.md` at the repo root — never overwrite existing entries. Each entry records the timestamp, the model used, and the prompt text. Only then perform the task.

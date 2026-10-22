@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 姓名：张珑恩 | 日期：2026-10-22 | 功能名称：JavaScript 六种基本数据类型演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 六种基本数据类型</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+        }
+
+        .zle_card {
+            padding: 1.25rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .zle_card:hover {
+            transform: translateY(-0.25rem);
+            border-color: var(--zle_accent);
+        }
+
+        .zle_card h2 {
+            margin: 0;
+            font-size: 1.15rem;
+        }
+
+        .zle_badge {
+            margin-left: 0.5rem;
+            padding: 0.1rem 0.55rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 10%);
+            border-radius: 999px;
+        }
+
+        .zle_card p {
+            margin: 0.5rem 0 0;
+            color: var(--zle_muted);
+            font-size: 0.9rem;
+        }
+
+        .zle_demo {
+            margin: 0.9rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            background: #eef4ff;
+            border-radius: 0.6rem;
+            overflow-x: auto;
+        }
+
+        .zle_demo dt {
+            color: var(--zle_muted);
+        }
+
+        .zle_demo dd {
+            margin: 0 0 0.35rem;
+            word-break: break-all;
+        }
+
+        .zle_demo dd:last-child {
+            margin-bottom: 0;
+        }
+
+        .zle_value {
+            color: #0a7d4d;
+        }
+
+        .zle_note {
+            margin: 1.5rem 0 0;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_card {
+                transition: none;
+            }
+
+            .zle_card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>JavaScript 六种基本数据类型</h1>
+            <p>原始类型（Primitive Types）：String、Number、Boolean、Undefined、Null、Symbol。下面的值与类型均由页面中的 JavaScript 实时计算得出。</p>
+        </header>
+
+        <main>
+            <section id="zle_type_grid" class="zle_grid" aria-label="六种基本数据类型演示">
+                <!-- 卡片由 JavaScript 生成 -->
+            </section>
+
+            <p class="zle_note">
+                说明：前五种是最常用的基本类型；Symbol 是 ES6 新增的原始类型，每个 Symbol 值都是唯一的。
+                另外，<code>typeof null</code> 的结果是 <code>"object"</code>，这是 JavaScript 早期遗留的历史问题，但 null 本身属于基本数据类型。
+                除这六种原始类型外，对象（Object）属于引用类型，不在本页演示范围内。
+            </p>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        var zle_types = [
+            {
+                zle_name: "String 字符串",
+                zle_desc: "用于表示文本，使用单引号、双引号或反引号包裹。",
+                zle_code: 'let zle_name = "张珑恩";',
+                zle_value: "张珑恩"
+            },
+            {
+                zle_name: "Number 数字",
+                zle_desc: "整数、小数、科学计数法都算同一种类型，包括 NaN 和 Infinity。",
+                zle_code: "let zle_age = 20;",
+                zle_value: 20
+            },
+            {
+                zle_name: "Boolean 布尔值",
+                zle_desc: "只有 true 和 false 两个值，常用于条件判断。",
+                zle_code: "let zle_isStudent = true;",
+                zle_value: true
+            },
+            {
+                zle_name: "Undefined 未定义",
+                zle_desc: "声明了变量但没有赋值时，它的值就是 undefined。",
+                zle_code: "let zle_future;",
+                zle_value: undefined
+            },
+            {
+                zle_name: "Null 空值",
+                zle_desc: "表示有意设置的“空”，需要手动赋值为 null。",
+                zle_code: "let zle_nothing = null;",
+                zle_value: null
+            },
+            {
+                zle_name: "Symbol 符号",
+                zle_desc: "ES6 新增，每次调用 Symbol() 都会得到唯一的值，常用作对象属性名。",
+                zle_code: 'let zle_id = Symbol("id");',
+                zle_value: Symbol("id")
+            }
+        ];
+
+        function zle_formatValue(zle_value) {
+            if (zle_value === undefined) {
+                return "undefined";
+            }
+            if (zle_value === null) {
+                return "null";
+            }
+            if (typeof zle_value === "string") {
+                return '"' + zle_value + '"';
+            }
+            return String(zle_value);
+        }
+
+        function zle_renderTypes() {
+            var zle_grid = document.getElementById("zle_type_grid");
+            var zle_html = "";
+
+            for (var zle_index = 0; zle_index < zle_types.length; zle_index++) {
+                var zle_item = zle_types[zle_index];
+
+                zle_html +=
+                    '<article class="zle_card">' +
+                        "<h2>" + zle_item.zle_name +
+                            '<span class="zle_badge">typeof: ' + typeof zle_item.zle_value + "</span>" +
+                        "</h2>" +
+                        "<p>" + zle_item.zle_desc + "</p>" +
+                        '<dl class="zle_demo">' +
+                            "<dt>代码</dt>" +
+                            "<dd>" + zle_item.zle_code + "</dd>" +
+                            "<dt>值</dt>" +
+                            '<dd class="zle_value">' + zle_formatValue(zle_item.zle_value) + "</dd>" +
+                            "<dt>typeof 结果</dt>" +
+                            "<dd>" + typeof zle_item.zle_value + "</dd>" +
+                        "</dl>" +
+                    "</article>";
+            }
+
+            zle_grid.innerHTML = zle_html;
+        }
+
+        zle_renderTypes();
+    </script>
+</body>
+</html>
