@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 姓名：张珑恩 | 日期：2026-10-26 | 功能名称：逢七过一百盒子演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逢七过 · 一百个盒子 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_pass: #ffd166;
+            --zle_radius: 0.75rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(64rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.25rem, 4vw, 2rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+        }
+
+        .zle_header code {
+            padding: 0.1rem 0.4rem;
+            font-size: 0.9em;
+            background: rgb(47 111 237 / 10%);
+            border-radius: 0.35rem;
+        }
+
+        .zle_legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            align-items: center;
+            margin: 0 0 1.25rem;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zle_legend-box {
+            display: inline-grid;
+            place-items: center;
+            width: 2rem;
+            height: 2rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            border-radius: 0.5rem;
+        }
+
+        .zle_legend-box--num {
+            color: var(--zle_accent);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+        }
+
+        .zle_legend-box--empty {
+            background: var(--zle_pass);
+            border: 1px dashed rgb(31 45 61 / 25%);
+        }
+
+        .zle_summary {
+            margin: 0 0 1.25rem;
+            font-size: 0.95rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_summary strong {
+            color: var(--zle_ink);
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 0.5rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            grid-template-columns: repeat(auto-fill, minmax(min(3.5rem, 100%), 1fr));
+        }
+
+        .zle_box {
+            display: grid;
+            place-items: center;
+            aspect-ratio: 1;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: clamp(0.85rem, 2vw, 1.05rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .zle_box:hover {
+            transform: translateY(-0.2rem);
+            border-color: var(--zle_accent);
+            box-shadow: 0 0.4rem 0.9rem rgb(31 45 61 / 12%);
+        }
+
+        .zle_box--empty {
+            background: var(--zle_pass);
+            border: 1px dashed rgb(31 45 61 / 25%);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_box {
+                transition: none;
+            }
+
+            .zle_box:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>逢七过 · 一百个盒子</h1>
+            <p>
+                一百个盒子里装着 1～100。凡是满足“7 的规则”的数字（
+                <code>7 的倍数</code>、<code>个位是 7</code>、<code>十位是 7</code>），
+                盒子就是空的；不满足规则的盒子正常显示数字。这就是经典的“逢七过”游戏规则。
+            </p>
+        </header>
+
+        <main>
+            <p class="zle_legend" aria-label="图例说明">
+                <span class="zle_legend-item">
+                    <span class="zle_legend-box zle_legend-box--num" aria-hidden="true">21</span>
+                    普通数字盒子
+                </span>
+                <span class="zle_legend-item">
+                    <span class="zle_legend-box zle_legend-box--empty" aria-hidden="true"></span>
+                    逢七过（空盒子）
+                </span>
+            </p>
+
+            <p id="zle_summary" class="zle_summary" aria-live="polite"></p>
+
+            <ul id="zle_grid" class="zle_grid" aria-label="1 到 100 的数字盒子"></ul>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        var zle_total = 100;
+
+        // 判断是否满足“7 的规则”：7 的倍数、个位是 7、十位是 7
+        function zle_isSevenRule(zle_num) {
+            return (
+                zle_num % 7 === 0 ||
+                zle_num % 10 === 7 ||
+                Math.floor(zle_num / 10) === 7
+            );
+        }
+
+        function zle_renderBoxes() {
+            var zle_grid = document.getElementById("zle_grid");
+            var zle_summary = document.getElementById("zle_summary");
+            var zle_html = "";
+            var zle_passCount = 0;
+
+            for (var zle_num = 1; zle_num <= zle_total; zle_num++) {
+                if (zle_isSevenRule(zle_num)) {
+                    zle_passCount++;
+                    zle_html +=
+                        '<li class="zle_box zle_box--empty" title="逢七过：' + zle_num + '"' +
+                        ' aria-label="' + zle_num + '，逢七过，空盒子"></li>';
+                } else {
+                    zle_html +=
+                        '<li class="zle_box" title="数字：' + zle_num + '"' +
+                        ' aria-label="' + zle_num + '">' + zle_num + "</li>";
+                }
+            }
+
+            zle_grid.innerHTML = zle_html;
+            zle_summary.innerHTML =
+                "共 <strong>" + zle_total + "</strong> 个盒子，其中 <strong>" +
+                zle_passCount + "</strong> 个逢七过（空盒子），<strong>" +
+                (zle_total - zle_passCount) + "</strong> 个正常显示数字。";
+        }
+
+        zle_renderBoxes();
+    </script>
+</body>
+</html>

@@ -19,10 +19,11 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 - Responsive style: `@media` breakpoints at `40rem` / `64rem`, fluid `clamp()`/`rem` type, and a `@media (prefers-reduced-motion: reduce)` fallback for any animation. Semantic landmarks with `aria-label`/`aria-labelledby`.
 - `netlify/index.html` uses CSS custom properties (`:root`) for its theme — reuse them if editing it.
 - **Naming:** every CSS class name, `id`, and JS variable name must be prefixed with `zle_` (e.g. `.zle_card`, `id="zle_box"`, `zleCount`). This supersedes the older `zhang` prefix used by existing pages.
-- **Header comment:** every HTML page must include a comment as the first thing inside `<head>`, in this exact shape:
+- **Header comment:** every newly created HTML file must include a comment as the first thing inside `<head>`. The comment records the author, the creation date, the AI model that built the page, and the page's purpose, in this exact shape:
   ```html
-  <!-- 姓名：张珑恩 | 日期：2026-10-22 | 功能名称：页面功能简述 -->
+  <!-- 张珑恩 | 建立时间：2026-10-26 13:40 | 使用大模型：GLM-5.3-Flash | 功能名称：页面功能简述 -->
   ```
+  Fill 建立时间 with the actual creation moment (`Get-Date`) and 使用大模型 with the model actually used for that session.
 
 ## Workflow rule: log every prompt first
 Before executing any user request, **append** it to `zhang prompt.md` at the repo root — never overwrite existing entries. Each entry records the timestamp, the model used, and the prompt text. Only then perform the task.
