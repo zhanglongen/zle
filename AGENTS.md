@@ -7,8 +7,8 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 `CodeBuddy/` and `Steam++/` are bundled third-party Windows applications (an Electron editor and a Steam tool), **not part of the website**. Never search, edit, or scan them — they add tens of thousands of irrelevant files.
 
 ## Layout
-- Repo root `10-1.html` … `10-4.html` — newest assignments (CSS animation, image slideshow, responsive viewport/grid demos). Not yet linked from the site index.
-- `netlify/` — the deployable site. `netlify/index.html` is the navigation hub; it links assignment pages `1.html` … `9-1.html` via `.link-card` entries.
+- `netlify/` — the deployable site. `netlify/index.html` is the navigation hub; it links **all** assignment pages (`1.html` … `15-1.html`) via `.link-card` entries.
+- All assignment pages live under `netlify/` (including the formerly root-level `10-1.html` … `15-1.html`). Do not create new assignment pages at the repo root.
 - `netlify/img/` — the only image assets (`1.jpeg`, `2.jpeg`, `3.jpeg`).
 
 ## Conventions (follow these)
