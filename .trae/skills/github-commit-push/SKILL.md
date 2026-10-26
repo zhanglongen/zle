@@ -37,8 +37,20 @@ If the `github` remote is missing, add it (SSH, since the public key is set):
 git remote add github git@github.com:zhanglongen/zle.git
 ```
 
-If SSH authentication fails (e.g. port 22 blocked), fall back to HTTPS and
-let the user handle credentials:
+## Network notes (already configured, do not redo)
+
+- **Port 22 is blocked** on this network — SSH only works over port 443
+  (`ssh.github.com:443`). `~/.ssh/config` already contains a
+  `Host github.com` block that redirects to `ssh.github.com:443`, reuses
+  `~/.ssh/id_ed25519_gitee` (the same public key is registered on the
+  GitHub account), and disables the post-quantum KEX
+  (`sntrup761x25519-sha512@openssh.com`) which the local LibreSSL build
+  cannot negotiate.
+- GitHub's SSH host keys (including `ssh.github.com:443`) are already in
+  `~/.ssh/known_hosts`.
+- So the plain `git@github.com:zhanglongen/zle.git` URL works as-is. If SSH
+  auth ever fails again, fall back to HTTPS and let the user handle
+  credentials:
 
 ```powershell
 git remote set-url github https://github.com/zhanglongen/zle.git
