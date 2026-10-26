@@ -7,17 +7,17 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 `CodeBuddy/` and `Steam++/` are bundled third-party Windows applications (an Electron editor and a Steam tool), **not part of the website**. Never search, edit, or scan them — they add tens of thousands of irrelevant files.
 
 ## Layout
-- `netlify/` — the deployable site. `netlify/index.html` is the navigation hub; it links **all** assignment pages (`1.html` … `15-1.html`) via `.link-card` entries.
-- All assignment pages live under `netlify/` (including the formerly root-level `10-1.html` … `15-1.html`). Do not create new assignment pages at the repo root.
-- `netlify/img/` — the only image assets (`1.jpeg`, `2.jpeg`, `3.jpeg`).
+- Repo root **is** the site (the old `netlify/` wrapper was removed on 2026-10-26). `index.html` at the root is the navigation hub; it links **all** assignment pages (`1.html` … `15-1.html`) via `.link-card` entries.
+- All assignment pages live at the repo root: `1.html` … `15-1.html`. Do not put them in subfolders.
+- `img/` — the only image assets (`1.jpeg`, `2.jpeg`, `3.jpeg`).
 
 ## Conventions (follow these)
-- **Native HTML + CSS + JavaScript only; no third-party libraries, frameworks, CDN, or external scripts.** This is an explicit requirement recorded in the prompt box inside `netlify/index.html`. Keep pages self-contained.
+- **Native HTML + CSS + JavaScript only; no third-party libraries, frameworks, CDN, or external scripts.** This is an explicit requirement recorded in the prompt box inside `index.html`. Keep pages self-contained.
 - **Icons:** all icons must come from the local iconfont in the `font/` directory (`font/iconfont.css` plus its font files, downloaded from iconfont.cn). Never load a CDN icon library (Font Awesome, iconfont CDN, etc.) or substitute emoji/SVG icon packs. The `font/` directory does not exist yet — add it when an icon is first needed.
 - **Data fetching:** get server-side data with the native `fetch()` API (`async`/`await`); never use AJAX libraries (jQuery, axios, etc.).
 - Keep the `<style>`-in-head pattern; do not introduce separate build steps or dependencies.
 - Responsive style: `@media` breakpoints at `40rem` / `64rem`, fluid `clamp()`/`rem` type, and a `@media (prefers-reduced-motion: reduce)` fallback for any animation. Semantic landmarks with `aria-label`/`aria-labelledby`.
-- `netlify/index.html` uses CSS custom properties (`:root`) for its theme — reuse them if editing it.
+- `index.html` uses CSS custom properties (`:root`) for its theme — reuse them if editing it.
 - **Naming:** every CSS class name, `id`, and JS variable name must be prefixed with `zle_` (e.g. `.zle_card`, `id="zle_box"`, `zleCount`). This supersedes the older `zhang` prefix used by existing pages.
 - **Header comment:** every newly created HTML file must include a comment as the first thing inside `<head>`. The comment records the author, the creation date, the AI model that built the page, and the page's purpose, in this exact shape:
   ```html
@@ -29,8 +29,8 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 Before executing any user request, **append** it to `zhang prompt.md` at the repo root — never overwrite existing entries. Each entry records the timestamp, the model used, and the prompt text. Only then perform the task.
 
 ## Gotchas
-- Images live **only** in `netlify/img/`. Root-level pages must reference them as `netlify/img/N.jpeg`; pages inside `netlify/` use `img/N.jpeg`.
-- `netlify/5-1.html` links `css.css`, which **does not exist** (known broken reference — don't "fix" by inventing a file unless asked).
-- `netlify/6-1 flex.html` has a space in its filename; quote paths in shell commands.
-- To publish a new page: add it under `netlify/` and add a matching `.link-card` block to `netlify/index.html` following the existing pattern.
-- No lint/typecheck/test commands exist; verify by opening the HTML in a browser (e.g. `Start-Process netlify\index.html`).
+- Images live **only** in `img/` at the repo root; pages reference them as `img/N.jpeg`.
+- `5-1.html` links `css.css`, which **does not exist** (known broken reference — don't "fix" by inventing a file unless asked).
+- `6-1 flex.html` has a space in its filename; quote paths in shell commands.
+- To publish a new page: add it at the repo root and add a matching `.link-card` block to `index.html` following the existing pattern.
+- No lint/typecheck/test commands exist; verify by opening the HTML in a browser (e.g. `Start-Process index.html`).
