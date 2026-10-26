@@ -89,3 +89,13 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbQt/DW/7gkmh21Kyk9WXZYZjjZ7gzsdgVjCs46H4HN
 - 模型: GLM-5.3-Flash
 - 提示词:
 把所有html东西都放到index然后把index上传
+
+## 2026-10-26 14:41:37
+- 模型: GLM-5.3-Flash
+- 提示词:
+把netlity文件夹删除保留里面的项目
+
+## 2026-10-26 14:44
+- 模型: GLM-5.3-Flash
+- 提示词:
+完成15-2.html，展示javascript程序结构，循环，条件。然后提交github.

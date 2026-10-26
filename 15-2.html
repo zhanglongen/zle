@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-10-26 14:44 | 使用大模型：GLM-5.3-Flash | 功能名称：JavaScript 程序结构演示（条件与循环） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 程序结构：条件与循环 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+        }
+
+        .zle_card {
+            padding: 1.25rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .zle_card:hover {
+            transform: translateY(-0.25rem);
+            border-color: var(--zle_accent);
+        }
+
+        .zle_card h2 {
+            margin: 0;
+            font-size: 1.15rem;
+        }
+
+        .zle_tag {
+            margin-left: 0.5rem;
+            padding: 0.1rem 0.55rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 10%);
+            border-radius: 999px;
+        }
+
+        .zle_card > p {
+            margin: 0.5rem 0 0;
+            color: var(--zle_muted);
+            font-size: 0.9rem;
+        }
+
+        .zle_code {
+            margin: 0.9rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            background: #eef4ff;
+            border-radius: 0.6rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .zle_result {
+            margin: 0.6rem 0 0;
+            padding: 0.7rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--zle_ok);
+            background: #effaf3;
+            border-radius: 0.6rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .zle_field {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.9rem 0 0;
+        }
+
+        .zle_input {
+            flex: 1 1 8rem;
+            padding: 0.45rem 0.7rem;
+            font-size: 0.95rem;
+            color: var(--zle_ink);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+        }
+
+        .zle_input:focus {
+            outline: 2px solid var(--zle_accent);
+            outline-offset: 1px;
+            border-color: transparent;
+        }
+
+        .zle_btn {
+            padding: 0.45rem 1rem;
+            font-size: 0.95rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .zle_btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .zle_note {
+            margin: 1.5rem 0 0;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_card {
+                transition: none;
+            }
+
+            .zle_card:hover {
+                transform: none;
+            }
+
+            .zle_btn {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>JavaScript 程序结构：条件与循环</h1>
+            <p>程序的三种基本结构是顺序、条件（分支）和循环。本页用六张卡片演示条件语句（if / switch）与循环语句（for / while / do…while / for…of、for…in），运行结果均由页面实时计算。</p>
+        </header>
+
+        <main>
+            <section class="zle_grid" aria-label="条件与循环结构演示">
+
+                <article class="zle_card">
+                    <h2>if / else if / else<span class="zle_tag">条件</span></h2>
+                    <p>输入一个分数，程序按区间判断等级。试试 95、85、72、59。</p>
+                    <div class="zle_code">if (zle_score &gt;= 90) { ... }
+else if (zle_score &gt;= 80) { ... }
+else if (zle_score &gt;= 60) { ... }
+else { ... }</div>
+                    <div class="zle_field">
+                        <input id="zle_score_input" class="zle_input" type="number" min="0" max="100" placeholder="输入分数 0~100" aria-label="输入分数">
+                        <button id="zle_score_btn" class="zle_btn" type="button">判断等级</button>
+                    </div>
+                    <div id="zle_score_out" class="zle_result" aria-live="polite">等待输入……</div>
+                </article>
+
+                <article class="zle_card">
+                    <h2>switch<span class="zle_tag">条件</span></h2>
+                    <p>根据今天的日期匹配星期几，适合多个等值分支的场景。</p>
+                    <div class="zle_code">switch (zle_day) {
+  case 1: zle_name = "星期一"; break;
+  ...
+  default: zle_name = "周末"; break;
+}</div>
+                    <div id="zle_switch_out" class="zle_result"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2>for 循环<span class="zle_tag">循环</span></h2>
+                    <p>循环次数已知时最常用：计算 1 + 2 + … + 100。</p>
+                    <div class="zle_code">var zle_sum = 0;
+for (var zle_i = 1; zle_i &lt;= 100; zle_i++) {
+  zle_sum += zle_i;
+}</div>
+                    <div id="zle_for_out" class="zle_result"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2>while 循环<span class="zle_tag">循环</span></h2>
+                    <p>先判断再执行：不断翻倍，直到超过 1000 为止。</p>
+                    <div class="zle_code">var zle_num = 1;
+while (zle_num &lt;= 1000) {
+  zle_num *= 2;
+}</div>
+                    <div id="zle_while_out" class="zle_result"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2>do…while 循环<span class="zle_tag">循环</span></h2>
+                    <p>先执行一次再判断，循环体至少运行一次。</p>
+                    <div class="zle_code">var zle_k = 1;
+do {
+  zle_list += zle_k + " ";
+  zle_k++;
+} while (zle_k &lt;= 5);</div>
+                    <div id="zle_dowhile_out" class="zle_result"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2>for…of 与 for…in<span class="zle_tag">循环</span></h2>
+                    <p>for…of 遍历数组的值，for…in 遍历对象的键。</p>
+                    <div class="zle_code">for (var zle_f of zle_fruits) { ... }
+for (var zle_key in zle_student) { ... }</div>
+                    <div id="zle_forof_out" class="zle_result"></div>
+                </article>
+
+            </section>
+
+            <p class="zle_note">
+                小结：if 适合区间判断，switch 适合等值匹配；for 用于已知次数，while 用于未知次数，
+                do…while 保证至少执行一次，for…of / for…in 分别面向可迭代对象与对象属性。
+                本页所有变量、id 与类名均以 zle_ 开头。
+            </p>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        // 1. if / else if / else：成绩等级
+        function zle_judgeScore() {
+            var zle_input = document.getElementById("zle_score_input");
+            var zle_out = document.getElementById("zle_score_out");
+            var zle_score = Number(zle_input.value);
+
+            if (zle_input.value === "" || isNaN(zle_score) || zle_score < 0 || zle_score > 100) {
+                zle_out.textContent = "请输入 0 ~ 100 之间的数字。";
+                return;
+            }
+
+            var zle_grade;
+            if (zle_score >= 90) {
+                zle_grade = "优秀";
+            } else if (zle_score >= 80) {
+                zle_grade = "良好";
+            } else if (zle_score >= 60) {
+                zle_grade = "及格";
+            } else {
+                zle_grade = "不及格";
+            }
+            zle_out.textContent = "分数 " + zle_score + " → 等级：" + zle_grade;
+        }
+        document.getElementById("zle_score_btn").addEventListener("click", zle_judgeScore);
+
+        // 2. switch：今天是星期几
+        (function () {
+            var zle_day = new Date().getDay();
+            var zle_name;
+            switch (zle_day) {
+                case 1: zle_name = "星期一"; break;
+                case 2: zle_name = "星期二"; break;
+                case 3: zle_name = "星期三"; break;
+                case 4: zle_name = "星期四"; break;
+                case 5: zle_name = "星期五"; break;
+                case 6: zle_name = "星期六"; break;
+                default: zle_name = "星期日"; break;
+            }
+            document.getElementById("zle_switch_out").textContent =
+                "getDay() = " + zle_day + " → 今天是 " + zle_name;
+        })();
+
+        // 3. for：1 加到 100
+        (function () {
+            var zle_sum = 0;
+            for (var zle_i = 1; zle_i <= 100; zle_i++) {
+                zle_sum += zle_i;
+            }
+            document.getElementById("zle_for_out").textContent =
+                "1 + 2 + … + 100 = " + zle_sum;
+        })();
+
+        // 4. while：翻倍直到超过 1000
+        (function () {
+            var zle_num = 1;
+            var zle_track = "1";
+            while (zle_num <= 1000) {
+                zle_num *= 2;
+                zle_track += " → " + zle_num;
+            }
+            document.getElementById("zle_while_out").textContent =
+                zle_track + "（共翻倍 " + (zle_track.split(" → ").length - 1) + " 次）";
+        })();
+
+        // 5. do…while：至少执行一次
+        (function () {
+            var zle_k = 1;
+            var zle_list = "";
+            do {
+                zle_list += zle_k + " ";
+                zle_k++;
+            } while (zle_k <= 5);
+            document.getElementById("zle_dowhile_out").textContent =
+                "输出：" + zle_list + "（共执行 5 次）";
+        })();
+
+        // 6. for…of 与 for…in
+        (function () {
+            var zle_fruits = ["苹果", "香蕉", "橘子"];
+            var zle_student = { zle_name: "张珑恩", zle_age: 20, zle_major: "网页设计" };
+
+            var zle_text = "for…of 数组：";
+            for (var zle_f of zle_fruits) {
+                zle_text += zle_f + " ";
+            }
+
+            zle_text += "\nfor…in 对象：";
+            for (var zle_key in zle_student) {
+                zle_text += "\n  " + zle_key + " = " + zle_student[zle_key];
+            }
+            document.getElementById("zle_forof_out").textContent = zle_text;
+        })();
+    </script>
+</body>
+</html>
