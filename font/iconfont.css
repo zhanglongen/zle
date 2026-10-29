@@ -1,0 +1,35 @@
+/*
+ * 本地图标字体（font/iconfont.css）
+ * 字体文件：iconfont.woff2 / iconfont.woff（开源 Bootstrap Icons 字体，已下载到本地，无 CDN 依赖）
+ * 使用：<span class="zle_ic zle_ic_like"></span>
+ */
+
+@font-face {
+    font-family: "zleIcon";
+    src: url("iconfont.woff2") format("woff2"),
+         url("iconfont.woff") format("woff");
+    font-display: block;
+}
+
+.zle_ic {
+    display: inline-block;
+    font-family: "zleIcon" !important;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    vertical-align: -0.125em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 点赞（大拇指） */
+.zle_ic_like::before { content: "\f407"; }
+
+/* 雪花 */
+.zle_ic_snow::before { content: "\f56d"; }
+
+/* 更多（横向三点） */
+.zle_ic_more::before { content: "\f5d4"; }
+
+/* 人民币符号 */
+.zle_ic_yen::before { content: "\f63a"; }

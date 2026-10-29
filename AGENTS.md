@@ -13,7 +13,7 @@ A student's "高级网页设计" (Advanced Web Design) course archive: **static 
 
 ## Conventions (follow these)
 - **Native HTML + CSS + JavaScript only; no third-party libraries, frameworks, CDN, or external scripts.** This is an explicit requirement recorded in the prompt box inside `index.html`. Keep pages self-contained.
-- **Icons:** all icons must come from the local iconfont in the `font/` directory (`font/iconfont.css` plus its font files, downloaded from iconfont.cn). Never load a CDN icon library (Font Awesome, iconfont CDN, etc.) or substitute emoji/SVG icon packs. The `font/` directory does not exist yet — add it when an icon is first needed.
+- **Icons:** all icons must come from the local iconfont in the `font/` directory (`font/iconfont.css` plus `iconfont.woff2`/`iconfont.woff`). Never load a CDN icon library or substitute emoji/SVG icon packs. Available classes (defined in `font/iconfont.css`): `.zle_ic` base + `.zle_ic_like`（点赞）、`.zle_ic_snow`（雪花）、`.zle_ic_more`（三点）、`.zle_ic_yen`（人民币）。Need another glyph? Add its codepoint class to `font/iconfont.css` rather than introducing another font.
 - **Data fetching:** get server-side data with the native `fetch()` API (`async`/`await`); never use AJAX libraries (jQuery, axios, etc.).
 - Keep the `<style>`-in-head pattern; do not introduce separate build steps or dependencies.
 - Responsive style: `@media` breakpoints at `40rem` / `64rem`, fluid `clamp()`/`rem` type, and a `@media (prefers-reduced-motion: reduce)` fallback for any animation. Semantic landmarks with `aria-label`/`aria-labelledby`.

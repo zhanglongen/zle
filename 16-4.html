@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-10-29 14:24 | 使用大模型：GLM-5.3-Flash | 功能名称：音乐手机选项卡新闻面板 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐手机 · 选项卡面板 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_ink: #333;
+            --zle_muted: #999;
+            --zle_blue: #2a62c0;
+            --zle_hover: #cc0000;
+            --zle_line: #e3e8ef;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem clamp(0.75rem, 3vw, 2rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: "Microsoft YaHei", "PingFang SC", SimSun, system-ui, sans-serif;
+            background: #f2f4f8;
+        }
+
+        .zle_card {
+            width: min(30rem, 100%);
+            background: #fff;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.25rem;
+            box-shadow: 0 0.3rem 1rem rgb(51 51 51 / 6%);
+        }
+
+        /* ---- 头部：蓝色标题块 + 标签条（bg20 = 白条底部蓝线） ---- */
+        .zle_header {
+            display: flex;
+            height: 24px;
+        }
+
+        .zle_title {
+            flex: none;
+            margin: 0;
+            padding: 0 1.05rem;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #fff;
+            background: linear-gradient(#5293d8, #74abe2);
+        }
+
+        .zle_tabs {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            gap: 2px;
+            margin: 0;
+            padding: 0 0.35rem;
+            list-style: none;
+            background: url(img/bg20.gif) repeat-x left top;
+        }
+
+        .zle_tab {
+            height: 22px;
+            padding: 0 0.85rem;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: var(--zle_ink);
+            background: url(img/bg22.gif) repeat-x left top;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .zle_tab:hover {
+            color: var(--zle_blue);
+        }
+
+        .zle_tab--on {
+            color: var(--zle_blue);
+            background: url(img/bg21.gif) repeat-x left top;
+            font-weight: 700;
+        }
+
+        /* ---- 新闻列表（dot.gif 雪碧图取蓝色方块：-5px -58px） ---- */
+        .zle_list {
+            margin: 0;
+            padding: 0.55rem 0.9rem 0.7rem;
+            list-style: none;
+        }
+
+        .zle_item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.3rem 0;
+            font-size: 14px;
+        }
+
+        .zle_item::before {
+            content: "";
+            flex: none;
+            width: 3px;
+            height: 3px;
+            background: url(img/dot.gif) no-repeat -5px -58px;
+        }
+
+        .zle_link {
+            color: var(--zle_ink);
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .zle_link:hover {
+            color: var(--zle_hover);
+        }
+
+        .zle_date {
+            flex: none;
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--zle_muted);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_tab,
+            .zle_link {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="zle_card">
+        <header class="zle_header">
+            <h1 class="zle_title">音乐手机</h1>
+            <ul class="zle_tabs" id="zle_tabs" role="tablist" aria-label="新闻分类"></ul>
+        </header>
+        <ul class="zle_list" id="zle_list" role="tabpanel"></ul>
+    </main>
+
+    <script>
+        var zle_tabsData = [
+            { zle_name: "行情", zle_items: [
+                { zle_text: "音乐强劲苹果iPhone 5价格稳定", zle_date: "12/19" },
+                { zle_text: "高性能双四核音乐机 魅族MX3低价热卖", zle_date: "12/19" },
+                { zle_text: "音乐品质最出色 vivo X3促销2199", zle_date: "12/12" },
+                { zle_text: "时尚音乐手机 vivo Xplay沉闸2998元", zle_date: "11/27" },
+                { zle_text: "好音乐好拍照 OPPO Find5今报价2580元", zle_date: "08/21" },
+                { zle_text: "1.5GHz四核1080p OPPO Find 5低价热卖", zle_date: "07/30" },
+                { zle_text: "彩色呼吸灯双核机 索尼M35h促销2299", zle_date: "06/08" },
+                { zle_text: "1.7GHz四核1080p vivo Xplay热卖中", zle_date: "06/07" }
+            ]},
+            { zle_name: "导购", zle_items: [
+                { zle_text: "优秀音效漂亮外观 市售音乐手机盘点", zle_date: "09/13" },
+                { zle_text: "不要虐待耳朵 8款独特音效的音乐手机荐", zle_date: "09/06" },
+                { zle_text: "最低只要799 9款高性能音乐手机推荐", zle_date: "07/22" },
+                { zle_text: "长假主导后高考时代 奖励孩子的智能手机全攻略", zle_date: "06/13" },
+                { zle_text: "降价不限时 端午后值得关注降价四核机推荐", zle_date: "06/13" },
+                { zle_text: "高考之后尽情狂欢！学生超强手机推荐", zle_date: "06/13" },
+                { zle_text: "上半年看这里 最热1080P四核旗舰手机", zle_date: "06/13" },
+                { zle_text: "最厚不过7.99毫米 热门超薄强大机大搜罗", zle_date: "05/08" }
+            ]},
+            { zle_name: "新品", zle_items: [
+                { zle_text: "无限接近完美！ vivo Xplay3S现场体验", zle_date: "12/19" },
+                { zle_text: "入门音乐机 诺基亚Lumia 625现身工信部", zle_date: "11/05" },
+                { zle_text: "传诺基亚下月将推首款WP音乐手机Glee", zle_date: "09/29" },
+                { zle_text: "软硬兼施 vivo XStudio Hi-Fi音乐圈讲解", zle_date: "08/23" },
+                { zle_text: "没有中国 省歌All Access音乐服务登陆欧洲", zle_date: "09/09" },
+                { zle_text: "Hi-Fi录音棚 vivo X3录制Xstudio音乐系统", zle_date: "08/07" },
+                { zle_text: "Hi-Fi不够vivo又玩录音棚 X3音乐处理方案曝光", zle_date: "06/06" },
+                { zle_text: "小伙伴都惊呆了 薄至6mm以下vivo X3反面", zle_date: "07/31" }
+            ]},
+            { zle_name: "评测", zle_items: [
+                { zle_text: "音乐历久弥新 TD版魅族MX3评测", zle_date: "12/19" },
+                { zle_text: "极致影音完美音质 步步高vivo Xplay移动版图赏", zle_date: "07/24" },
+                { zle_text: "都是大屏何不同？ 三星S4/Mega静态评测", zle_date: "08/20" },
+                { zle_text: "超值四核智能手机 HTC Desire 608t评测", zle_date: "08/20" },
+                { zle_text: "完美融合微博 魅族MX2 Flyme 2.2.5体验", zle_date: "08/18" },
+                { zle_text: "1080p屏Hi-Fi旗舰 vivo Xplay娱乐体验", zle_date: "06/13" },
+                { zle_text: "5.7英寸高清巨屏 酷派9070+XO影音体验", zle_date: "06/06" },
+                { zle_text: "悬浮窗口播放 vivo Xplay视频功能体验", zle_date: "05/06" }
+            ]}
+        ];
+
+        var zle_current = 0;
+
+        function zle_renderTabs() {
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_tabsData.length; zle_i++) {
+                zle_html += '<li role="presentation"><button type="button" class="zle_tab' +
+                    (zle_i === zle_current ? " zle_tab--on" : "") +
+                    '" data-zle-index="' + zle_i + '" aria-selected="' +
+                    (zle_i === zle_current) + '">' + zle_tabsData[zle_i].zle_name + "</button></li>";
+            }
+            document.getElementById("zle_tabs").innerHTML = zle_html;
+        }
+
+        function zle_renderList() {
+            var zle_items = zle_tabsData[zle_current].zle_items;
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_items.length; zle_i++) {
+                zle_html += '<li class="zle_item"><span class="zle_link">' +
+                    zle_items[zle_i].zle_text + '</span><span class="zle_date">(' +
+                    zle_items[zle_i].zle_date + ")</span></li>";
+            }
+            document.getElementById("zle_list").innerHTML = zle_html;
+        }
+
+        document.getElementById("zle_tabs").addEventListener("click", function (zle_ev) {
+            var zle_btn = zle_ev.target.closest("button");
+            if (!zle_btn) { return; }
+            var zle_index = Number(zle_btn.dataset.zleIndex);
+            if (zle_index === zle_current) { return; }
+            zle_current = zle_index;
+            zle_renderTabs();
+            zle_renderList();
+        });
+
+        zle_renderTabs();
+        zle_renderList();
+    </script>
+</body>
+</html>

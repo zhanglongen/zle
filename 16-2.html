@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-10-29 13:44 | 使用大模型：GLM-5.3-Flash | 功能名称：JavaScript 对象可视化演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 对象可视化演示 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_danger: #d64545;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+        }
+
+        .zle_panel {
+            padding: clamp(1.1rem, 3vw, 1.6rem);
+            margin: 0 0 1.5rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel > h2 {
+            margin: 0 0 0.35rem;
+            font-size: clamp(1.2rem, 3vw, 1.45rem);
+        }
+
+        .zle_panel > p {
+            margin: 0 0 1rem;
+            color: var(--zle_muted);
+            font-size: 0.92rem;
+        }
+
+        .zle_kvbox {
+            padding: 0.8rem;
+            background: #eef4ff;
+            border-radius: 0.75rem;
+        }
+
+        .zle_kv {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.3rem 0;
+        }
+
+        .zle_kv--in {
+            animation: zle_pop 0.35s ease;
+        }
+
+        .zle_key {
+            min-width: 6.5rem;
+            padding: 0.25rem 0.7rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: #fff;
+            text-align: center;
+            background: var(--zle_accent);
+            border-radius: 0.5rem;
+        }
+
+        .zle_val {
+            padding: 0.25rem 0.7rem;
+            font-size: 0.92rem;
+            color: var(--zle_ink);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+        }
+
+        .zle_method {
+            background: #fdeee6;
+            border-color: #f0c8ae;
+            color: #b45309;
+        }
+
+        @keyframes zle_pop {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .zle_brace {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 1.1rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_ops {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .zle_opbtn {
+            padding: 0.4rem 0.85rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--zle_ink);
+            background: #f5f8fd;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.55rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .zle_opbtn:hover {
+            border-color: var(--zle_accent);
+            background: #eef4ff;
+            transform: translateY(-0.1rem);
+        }
+
+        .zle_opbtn--read { border-left: 0.3rem solid #8e44ad; }
+        .zle_opbtn--add { border-left: 0.3rem solid #27ae60; }
+        .zle_opbtn--del { border-left: 0.3rem solid var(--zle_danger); }
+        .zle_opbtn--method { border-left: 0.3rem solid #e67e22; }
+        .zle_opbtn--reset { border-left: 0.3rem solid #95a5a6; }
+
+        .zle_log {
+            margin: 1rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            background: #f5f8fd;
+            border-radius: 0.6rem;
+            max-height: 11rem;
+            overflow-y: auto;
+        }
+
+        .zle_log div {
+            padding: 0.15rem 0;
+            border-bottom: 1px dashed var(--zle_line);
+        }
+
+        .zle_log div:last-child {
+            border-bottom: none;
+        }
+
+        .zle_log strong {
+            color: var(--zle_accent);
+        }
+
+        .zle_cards {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+        }
+
+        .zle_idcard {
+            overflow: hidden;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.85rem;
+            box-shadow: 0 0.5rem 1.2rem rgb(31 45 61 / 10%);
+        }
+
+        .zle_idcard--in {
+            animation: zle_pop 0.35s ease;
+        }
+
+        .zle_idcard header {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.8rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--zle_accent), #7aa9ff);
+        }
+
+        .zle_idcard dl {
+            margin: 0;
+            padding: 0.7rem 0.9rem 0.9rem;
+        }
+
+        .zle_idcard dt {
+            font-size: 0.75rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_idcard dd {
+            margin: 0 0 0.45rem;
+            font-size: 0.95rem;
+        }
+
+        .zle_idcard dd:last-child {
+            margin-bottom: 0;
+        }
+
+        .zle_tablewrap {
+            overflow-x: auto;
+        }
+
+        .zle_table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .zle_table th,
+        .zle_table td {
+            padding: 0.5rem 0.7rem;
+            text-align: left;
+            border-bottom: 1px solid var(--zle_line);
+        }
+
+        .zle_table th {
+            color: var(--zle_muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .zle_table td:first-child {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+            white-space: nowrap;
+        }
+
+        .zle_table td:last-child {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_ok);
+            word-break: break-all;
+        }
+
+        .zle_note {
+            margin: 0 0 1.5rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_kv--in,
+            .zle_idcard--in {
+                animation: none;
+            }
+
+            .zle_opbtn {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>JavaScript 对象可视化演示</h1>
+            <p>对象（Object）用“键值对”描述同一个事物的多项信息，就像一张信息卡：左边是属性名（钥匙），右边是属性值。下面把对象画成卡片，直观演示属性的增、删、查和对象方法。</p>
+        </header>
+
+        <section class="zle_panel" aria-label="对象属性操作演示">
+            <h2>体验台：把对象看成一张信息卡</h2>
+            <p>蓝色小牌是属性名（键），白牌是属性值。紫色按钮读取属性、绿色添加、红色删除，操作后卡片实时更新。</p>
+            <div class="zle_kvbox">
+                <div class="zle_brace">var zle_student = {</div>
+                <div id="zle_kvrows" aria-live="polite"></div>
+                <div class="zle_brace">};</div>
+            </div>
+            <div class="zle_ops" id="zle_ops"></div>
+            <div id="zle_log" class="zle_log" aria-label="操作日志"></div>
+        </section>
+
+        <section class="zle_panel" aria-label="对象方法与 this 演示">
+            <h2>对象方法与 this</h2>
+            <p>对象的属性值也可以是函数，这样的属性叫方法；方法里的 this 指向对象自己，因此能直接使用对象的其他属性。</p>
+            <div id="zle_method_ops" class="zle_ops"></div>
+            <div id="zle_method_log" class="zle_log" aria-label="方法调用日志"></div>
+        </section>
+
+        <section class="zle_panel" aria-label="构造函数批量创建对象演示">
+            <h2>构造函数：批量生成对象</h2>
+            <p>用同一个“模板”（构造函数）可以创建许多结构相同的对象，就像同一版式的学生证，每张填写不同内容。</p>
+            <div id="zle_cards" class="zle_cards"></div>
+            <div class="zle_ops" id="zle_card_ops"></div>
+        </section>
+
+        <p class="zle_note">
+            速查表中的示例统一使用对象 <code>var zle_obj = { zle_name: "张珑恩", zle_age: 20 }</code> 计算，结果由页面实时求出；
+            会修改对象的操作（添加、删除、合并）都先复制再演示。
+        </p>
+
+        <section class="zle_panel" aria-label="对象操作速查表">
+            <h2>对象操作速查表</h2>
+            <div class="zle_tablewrap">
+                <table class="zle_table">
+                    <thead>
+                        <tr><th>操作</th><th>作用</th><th>示例</th><th>结果</th></tr>
+                    </thead>
+                    <tbody id="zle_table_body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        /* ---------- 通用日志 ---------- */
+        function zle_logTo(zle_elId, zle_code, zle_text) {
+            var zle_log = document.getElementById(zle_elId);
+            var zle_line = document.createElement("div");
+            zle_line.innerHTML = "<strong>" + zle_code + "</strong> → " + zle_text;
+            zle_log.insertBefore(zle_line, zle_log.firstChild);
+            while (zle_log.children.length > 8) {
+                zle_log.removeChild(zle_log.lastChild);
+            }
+        }
+
+        /* ---------- 体验台：对象属性 ---------- */
+        var zle_student = { zle_name: "张珑恩", zle_age: 20, zle_major: "网页设计" };
+        var zle_initStudent = JSON.parse(JSON.stringify(zle_student));
+        var zle_lastKey = null;
+
+        function zle_renderStudent() {
+            var zle_html = "";
+            for (var zle_key in zle_student) {
+                var zle_isFn = typeof zle_student[zle_key] === "function";
+                zle_html += '<div class="zle_kv' + (zle_key === zle_lastKey ? " zle_kv--in" : "") + '">' +
+                    '<span class="zle_key">' + zle_key + '</span>' +
+                    '<span class="zle_val' + (zle_isFn ? " zle_method" : "") + '">' +
+                    (zle_isFn ? "ƒ 函数" : zle_student[zle_key]) + "</span></div>";
+            }
+            if (zle_html === "") {
+                zle_html = '<div class="zle_kv"><span class="zle_val">（对象是空的）</span></div>';
+            }
+            document.getElementById("zle_kvrows").innerHTML = zle_html;
+            zle_lastKey = null;
+        }
+
+        var zle_ops = [
+            { zle_cls: "read", zle_code: "zle_student.zle_name", zle_run: function () {
+                return "点表示法读取 → " + zle_student.zle_name;
+            }},
+            { zle_cls: "read", zle_code: 'zle_student["zle_age"]', zle_run: function () {
+                return "方括号表示法读取 → " + zle_student["zle_age"];
+            }},
+            { zle_cls: "read", zle_code: '"zle_major" in zle_student', zle_run: function () {
+                return "属性是否存在 → " + ("zle_major" in zle_student);
+            }},
+            { zle_cls: "add", zle_code: 'zle_student.zle_hobby = "篮球"', zle_run: function () {
+                zle_student.zle_hobby = "篮球"; zle_lastKey = "zle_hobby";
+                return "新增属性 zle_hobby";
+            }},
+            { zle_cls: "add", zle_code: "zle_student.zle_intro = function ...", zle_run: function () {
+                zle_student.zle_intro = function () {
+                    return "我是" + this.zle_name + "，主修" + this.zle_major;
+                };
+                zle_lastKey = "zle_intro";
+                return "把函数赋给属性，它就变成了方法";
+            }},
+            { zle_cls: "del", zle_code: "delete zle_student.zle_age", zle_run: function () {
+                delete zle_student.zle_age;
+                return "删除属性 zle_age";
+            }},
+            { zle_cls: "read", zle_code: "for (var zle_key in zle_student)", zle_run: function () {
+                var zle_keys = [];
+                for (var zle_k in zle_student) { zle_keys.push(zle_k); }
+                return "for…in 遍历到 " + zle_keys.length + " 个键：" + zle_keys.join("、");
+            }},
+            { zle_cls: "reset", zle_code: "重置对象", zle_run: function () {
+                zle_student = JSON.parse(JSON.stringify(zle_initStudent));
+                return "恢复为初始对象";
+            }}
+        ];
+
+        (function zle_initOps() {
+            var zle_el = document.getElementById("zle_ops");
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_ops.length; zle_i++) {
+                zle_html += '<button type="button" class="zle_opbtn zle_opbtn--' + zle_ops[zle_i].zle_cls +
+                    '" data-zle-index="' + zle_i + '">' + zle_ops[zle_i].zle_code + "</button>";
+            }
+            zle_el.innerHTML = zle_html;
+
+            zle_el.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_op = zle_ops[Number(zle_btn.dataset.zleIndex)];
+                var zle_text = zle_op.zle_run();
+                zle_renderStudent();
+                zle_logTo("zle_log", zle_op.zle_code, zle_text);
+            });
+        })();
+
+        zle_renderStudent();
+
+        /* ---------- 对象方法与 this ---------- */
+        var zle_scorer = {
+            zle_js: 90,
+            zle_css: 85,
+            zle_html: 88,
+            zle_avg: function () {
+                var zle_sum = 0;
+                var zle_count = 0;
+                for (var zle_key in this) {
+                    if (typeof this[zle_key] === "number") {
+                        zle_sum += this[zle_key];
+                        zle_count++;
+                    }
+                }
+                return zle_sum / zle_count;
+            },
+            zle_label: "成绩单"
+        };
+
+        var zle_methodOps = [
+            { zle_code: "zle_scorer.zle_avg()", zle_run: function () {
+                return "遍历 this 中的数字属性求平均 → " + zle_scorer.zle_avg() +
+                    "（" + zle_scorer.zle_js + "、" + zle_scorer.zle_css + "、" + zle_scorer.zle_html + " 三科）";
+            }},
+            { zle_code: "zle_scorer.zle_label", zle_run: function () {
+                return "this 之外也可以直接按属性名访问 → " + zle_scorer.zle_label;
+            }},
+            { zle_code: 'zle_scorer["zle_" + "js"]', zle_run: function () {
+                var zle_tmp = "js";
+                return "方括号里可以用变量拼接键名 → " + zle_scorer["zle_" + zle_tmp];
+            }}
+        ];
+
+        (function zle_initMethodOps() {
+            var zle_el = document.getElementById("zle_method_ops");
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_methodOps.length; zle_i++) {
+                zle_html += '<button type="button" class="zle_opbtn zle_opbtn--method" data-zle-index="' +
+                    zle_i + '">' + zle_methodOps[zle_i].zle_code + "</button>";
+            }
+            zle_el.innerHTML = zle_html;
+
+            zle_el.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_op = zle_methodOps[Number(zle_btn.dataset.zleIndex)];
+                zle_logTo("zle_method_log", zle_op.zle_code, zle_op.zle_run());
+            });
+        })();
+
+        /* ---------- 构造函数批量创建 ---------- */
+        function ZleStudent(zle_name, zle_age, zle_major) {
+            this.zle_name = zle_name;
+            this.zle_age = zle_age;
+            this.zle_major = zle_major;
+            this.zle_intro = function () {
+                return this.zle_name + "（" + this.zle_age + " 岁）· " + this.zle_major;
+            };
+        }
+
+        var zle_students = [
+            new ZleStudent("张珑恩", 20, "网页设计"),
+            new ZleStudent("李雷", 21, "前端开发"),
+            new ZleStudent("韩梅梅", 19, "UI 设计")
+        ];
+        var zle_lastCard = null;
+
+        function zle_renderCards() {
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_students.length; zle_i++) {
+                var zle_s = zle_students[zle_i];
+                zle_html += '<article class="zle_idcard' +
+                    (zle_s === zle_lastCard ? " zle_idcard--in" : "") + '">' +
+                    "<header>Student ID · " + (zle_i + 1) + "</header>" +
+                    "<dl>" +
+                    "<dt>姓名</dt><dd>" + zle_s.zle_name + "</dd>" +
+                    "<dt>年龄</dt><dd>" + zle_s.zle_age + "</dd>" +
+                    "<dt>方向</dt><dd>" + zle_s.zle_major + "</dd>" +
+                    "</dl></article>";
+            }
+            if (zle_html === "") {
+                zle_html = '<p style="margin:0;color:var(--zle_muted)">（没有学生对象了，点上面按钮重新创建）</p>';
+            }
+            document.getElementById("zle_cards").innerHTML = zle_html;
+            zle_lastCard = null;
+        }
+
+        var zle_cardOps = [
+            { zle_cls: "add", zle_code: 'new ZleStudent("王明", 22, "移动开发")', zle_run: function () {
+                zle_lastCard = new ZleStudent("王明", 22, "移动开发");
+                zle_students.push(zle_lastCard);
+                return "构造函数创建第 " + zle_students.length + " 个学生对象";
+            }},
+            { zle_cls: "method", zle_code: "zle_students[i].zle_intro()", zle_run: function () {
+                if (zle_students.length === 0) { return "没有学生对象可调用"; }
+                var zle_lines = [];
+                for (var zle_i = 0; zle_i < zle_students.length; zle_i++) {
+                    zle_lines.push(zle_students[zle_i].zle_intro());
+                }
+                return "每个对象调用自己的方法：" + zle_lines.join(" ／ ");
+            }},
+            { zle_cls: "del", zle_code: "zle_students.pop()", zle_run: function () {
+                var zle_x = zle_students.pop();
+                return "删除最后一个对象" + (zle_x ? "：" + zle_x.zle_name : "（数组已空）");
+            }}
+        ];
+
+        (function zle_initCardOps() {
+            var zle_el = document.getElementById("zle_card_ops");
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_cardOps.length; zle_i++) {
+                zle_html += '<button type="button" class="zle_opbtn zle_opbtn--' + zle_cardOps[zle_i].zle_cls +
+                    '" data-zle-index="' + zle_i + '">' + zle_cardOps[zle_i].zle_code + "</button>";
+            }
+            zle_el.innerHTML = zle_html;
+
+            zle_el.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_op = zle_cardOps[Number(zle_btn.dataset.zleIndex)];
+                zle_op.zle_run();
+                zle_renderCards();
+            });
+        })();
+
+        zle_renderCards();
+
+        /* ---------- 速查表 ---------- */
+        (function zle_initTable() {
+            function zle_fresh() {
+                return { zle_name: "张珑恩", zle_age: 20 };
+            }
+            var zle_rows = [
+                ["zle_obj.zle_name", "点表示法读取属性", function () { return '"张珑恩"'; }],
+                ['zle_obj["zle_age"]', "方括号表示法读取属性", function () { return "20"; }],
+                ["zle_obj.zle_hobby = 1", "新增或修改属性", function () {
+                    var zle_o = zle_fresh(); zle_o.zle_hobby = 1;
+                    return JSON.stringify(zle_o);
+                }],
+                ["delete zle_obj.zle_age", "删除属性", function () {
+                    var zle_o = zle_fresh(); delete zle_o.zle_age;
+                    return JSON.stringify(zle_o);
+                }],
+                ['"zle_age" in zle_obj', "判断属性是否存在", function () { return String("zle_age" in zle_fresh()); }],
+                ["zle_obj.hasOwnProperty(...)", "判断是否为自有属性", function () { return String(zle_fresh().hasOwnProperty("zle_name")); }],
+                ["Object.keys(zle_obj)", "取得所有键名数组", function () { return JSON.stringify(Object.keys(zle_fresh())); }],
+                ["Object.values(zle_obj)", "取得所有属性值数组", function () { return JSON.stringify(Object.values(zle_fresh())); }],
+                ["Object.entries(zle_obj)", "取得键值对二维数组", function () { return JSON.stringify(Object.entries(zle_fresh())); }],
+                ["JSON.stringify(zle_obj)", "把对象序列化为 JSON 字符串", function () { return JSON.stringify(JSON.stringify(zle_fresh())).slice(1, -1).replace(/"/g, "&quot;"); }],
+                ["Object.assign({}, a, b)", "合并对象", function () {
+                    return JSON.stringify(Object.assign({}, zle_fresh(), { zle_hobby: 1 }));
+                }],
+                ["for (var k in zle_obj)", "遍历对象所有键", function () {
+                    var zle_o = zle_fresh(); var zle_ks = [];
+                    for (var zle_k in zle_o) { zle_ks.push(zle_k); }
+                    return zle_ks.join("、");
+                }]
+            ];
+
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_rows.length; zle_i++) {
+                zle_html += "<tr><td>" + zle_rows[zle_i][0] + "</td><td>" + zle_rows[zle_i][1] +
+                    "</td><td>zle_obj</td><td>" + zle_rows[zle_i][2]() + "</td></tr>";
+            }
+            document.getElementById("zle_table_body").innerHTML = zle_html;
+        })();
+    </script>
+</body>
+</html>

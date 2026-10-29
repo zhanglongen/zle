@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-10-29 13:41 | 使用大模型：GLM-5.3-Flash | 功能名称：JavaScript 数组方法可视化演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 数组方法可视化演示 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_danger: #d64545;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+        }
+
+        .zle_panel {
+            padding: clamp(1.1rem, 3vw, 1.6rem);
+            margin: 0 0 1.5rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel > h2 {
+            margin: 0 0 0.35rem;
+            font-size: clamp(1.2rem, 3vw, 1.45rem);
+        }
+
+        .zle_panel > p {
+            margin: 0 0 1rem;
+            color: var(--zle_muted);
+            font-size: 0.92rem;
+        }
+
+        .zle_chiprow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            align-items: center;
+            min-height: 3.4rem;
+            padding: 0.8rem;
+            background: #eef4ff;
+            border-radius: 0.75rem;
+        }
+
+        .zle_chip {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.95rem;
+            color: #fff;
+            border-radius: 0.65rem;
+            box-shadow: 0 0.3rem 0.7rem rgb(31 45 61 / 15%);
+        }
+
+        .zle_chip--in {
+            animation: zle_pop 0.35s ease;
+        }
+
+        .zle_chips_empty {
+            color: var(--zle_muted);
+            font-size: 0.9rem;
+        }
+
+        @keyframes zle_pop {
+            from { transform: scale(0.4); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .zle_flip {
+            animation: zle_flip 0.4s ease;
+        }
+
+        @keyframes zle_flip {
+            50% { transform: scaleX(-0.6); }
+        }
+
+        .zle_ops {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .zle_opbtn {
+            padding: 0.4rem 0.85rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--zle_ink);
+            background: #f5f8fd;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.55rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .zle_opbtn:hover {
+            border-color: var(--zle_accent);
+            background: #eef4ff;
+            transform: translateY(-0.1rem);
+        }
+
+        .zle_opbtn--add { border-left: 0.3rem solid #27ae60; }
+        .zle_opbtn--del { border-left: 0.3rem solid var(--zle_danger); }
+        .zle_opbtn--find { border-left: 0.3rem solid #8e44ad; }
+        .zle_opbtn--trans { border-left: 0.3rem solid var(--zle_accent); }
+        .zle_opbtn--reset { border-left: 0.3rem solid #95a5a6; }
+
+        .zle_log {
+            margin: 1rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            background: #f5f8fd;
+            border-radius: 0.6rem;
+            max-height: 12rem;
+            overflow-y: auto;
+        }
+
+        .zle_log div {
+            padding: 0.15rem 0;
+            border-bottom: 1px dashed var(--zle_line);
+        }
+
+        .zle_log div:last-child {
+            border-bottom: none;
+        }
+
+        .zle_log strong {
+            color: var(--zle_accent);
+        }
+
+        .zle_bars {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            height: 12rem;
+            padding: 0.8rem;
+            background: #eef4ff;
+            border-radius: 0.75rem;
+        }
+
+        .zle_bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+        }
+
+        .zle_bar i {
+            display: block;
+            width: 100%;
+            max-width: 3rem;
+            background: linear-gradient(180deg, #6ea0ff, var(--zle_accent));
+            border-radius: 0.4rem 0.4rem 0 0;
+            transition: height 0.45s ease, background 0.45s ease;
+        }
+
+        .zle_bar b {
+            margin-top: 0.3rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--zle_muted);
+        }
+
+        .zle_barresult {
+            margin: 0.8rem 0 0;
+            padding: 0.6rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.88rem;
+            color: var(--zle_ok);
+            background: #effaf3;
+            border-radius: 0.6rem;
+        }
+
+        .zle_tablewrap {
+            overflow-x: auto;
+        }
+
+        .zle_table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .zle_table th,
+        .zle_table td {
+            padding: 0.5rem 0.7rem;
+            text-align: left;
+            border-bottom: 1px solid var(--zle_line);
+        }
+
+        .zle_table th {
+            color: var(--zle_muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .zle_table td:first-child {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+            white-space: nowrap;
+        }
+
+        .zle_table td:last-child {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_ok);
+            word-break: break-all;
+        }
+
+        .zle_note {
+            margin: 0 0 1.5rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_chip--in,
+            .zle_flip {
+                animation: none;
+            }
+
+            .zle_opbtn {
+                transition: none;
+            }
+
+            .zle_bar i {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>JavaScript 数组方法可视化演示</h1>
+            <p>数组是最常用的数据结构。下面把数组画成一个个彩色方块，点击按钮就能直观看到每种方法如何增、删、查、转数组元素；最后附一张全部主要方法的速查表。</p>
+        </header>
+
+        <section class="zle_panel" aria-label="数组方法体验台">
+            <h2>体验台：把数组看成一行方块</h2>
+            <p>绿色按钮在两端添加、红色删除、紫色查找（不改变原数组）、蓝色转换。每次操作后都会重画下面的方块并记录到日志。</p>
+            <div id="zle_chips" class="zle_chiprow" aria-live="polite"></div>
+            <div class="zle_ops" id="zle_ops"></div>
+            <div id="zle_log" class="zle_log" aria-label="操作日志"></div>
+        </section>
+
+        <section class="zle_panel" aria-label="map filter reduce 条形图演示">
+            <h2>map / filter / reduce：用条形图看变换</h2>
+            <p>每个数字画成一根柱子。map 让所有柱子一起变高，filter 只留下偶数柱子，reduce 把所有柱子合并成一个总和。</p>
+            <div id="zle_bars" class="zle_bars"></div>
+            <div class="zle_ops" id="zle_numops"></div>
+            <div id="zle_barresult" class="zle_barresult">当前数组：[5, 3, 8, 1, 4, 9, 2, 7]</div>
+        </section>
+
+        <p class="zle_note">
+            速查表中的示例统一使用数组 <code>var zle_demo = [3, 1, 4, 1, 5]</code> 计算，结果由页面实时求出；
+            会修改原数组的（push、pop、shift、unshift、splice、reverse、sort）都先复制再演示。
+        </p>
+
+        <section class="zle_panel" aria-label="数组方法速查表">
+            <h2>数组方法速查表</h2>
+            <div class="zle_tablewrap">
+                <table class="zle_table">
+                    <thead>
+                        <tr><th>方法</th><th>作用</th><th>示例</th><th>结果</th></tr>
+                    </thead>
+                    <tbody id="zle_table_body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        /* ---------- 工具 ---------- */
+        var zle_colors = {
+            "苹果": "#e74c3c", "香蕉": "#e6a817", "橘子": "#e67e22",
+            "葡萄": "#8e44ad", "西瓜": "#27ae60", "樱桃": "#c0392b",
+            "柠檬": "#b7950b", "桃子": "#e08e79"
+        };
+
+        function zle_chipHtml(zle_name, zle_anim) {
+            var zle_color = zle_colors[zle_name] || "#5b6b7c";
+            return '<span class="zle_chip' + (zle_anim ? " zle_chip--in" : "") +
+                '" style="background:' + zle_color + '">' + zle_name + "</span>";
+        }
+
+        function zle_renderChips(zle_el, zle_arr, zle_newName) {
+            if (zle_arr.length === 0) {
+                zle_el.innerHTML = '<span class="zle_chips_empty">（空数组）</span>';
+                return;
+            }
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_arr.length; zle_i++) {
+                zle_html += zle_chipHtml(zle_arr[zle_i], zle_arr[zle_i] === zle_newName);
+            }
+            zle_el.innerHTML = zle_html;
+        }
+
+        function zle_logOp(zle_code, zle_text) {
+            var zle_log = document.getElementById("zle_log");
+            var zle_line = document.createElement("div");
+            zle_line.innerHTML = "<strong>" + zle_code + "</strong> → " + zle_text;
+            zle_log.insertBefore(zle_line, zle_log.firstChild);
+            while (zle_log.children.length > 8) {
+                zle_log.removeChild(zle_log.lastChild);
+            }
+        }
+
+        /* ---------- 体验台 ---------- */
+        var zle_arr = ["苹果", "香蕉", "橘子", "葡萄", "西瓜"];
+        var zle_init = zle_arr.slice();
+        var zle_lastAdded = null;
+
+        var zle_ops = [
+            { zle_cls: "add", zle_code: 'push("樱桃")', zle_run: function () {
+                zle_arr.push("樱桃"); zle_lastAdded = "樱桃";
+                return "在末尾添加樱桃";
+            }},
+            { zle_cls: "add", zle_code: 'unshift("柠檬")', zle_run: function () {
+                zle_arr.unshift("柠檬"); zle_lastAdded = "柠檬";
+                return "在开头添加柠檬";
+            }},
+            { zle_cls: "add", zle_code: 'splice(1, 0, "桃子")', zle_run: function () {
+                zle_arr.splice(1, 0, "桃子"); zle_lastAdded = "桃子";
+                return "在索引 1 处插入桃子";
+            }},
+            { zle_cls: "del", zle_code: "pop()", zle_run: function () {
+                var zle_x = zle_arr.pop();
+                return "删除末尾元素，返回 " + (zle_x === undefined ? "undefined（数组已空）" : zle_x);
+            }},
+            { zle_cls: "del", zle_code: "shift()", zle_run: function () {
+                var zle_x = zle_arr.shift();
+                return "删除开头元素，返回 " + (zle_x === undefined ? "undefined（数组已空）" : zle_x);
+            }},
+            { zle_cls: "del", zle_code: "splice(1, 1)", zle_run: function () {
+                var zle_rm = zle_arr.splice(1, 1);
+                return "从索引 1 删除 1 个元素" + (zle_rm.length ? "：" + zle_rm[0] : "（数组已空）");
+            }},
+            { zle_cls: "find", zle_code: 'indexOf("橘子")', zle_run: function () {
+                return "返回索引 " + zle_arr.indexOf("橘子") + "（找不到为 -1）";
+            }},
+            { zle_cls: "find", zle_code: 'includes("西瓜")', zle_run: function () {
+                return "返回 " + zle_arr.includes("西瓜");
+            }},
+            { zle_cls: "trans", zle_code: "reverse()", zle_run: function () {
+                zle_arr.reverse(); zle_lastAdded = null;
+                return "原地反转数组顺序";
+            }},
+            { zle_cls: "trans", zle_code: "sort()", zle_run: function () {
+                zle_arr.sort(); zle_lastAdded = null;
+                return "按 Unicode 码位排序（数字排序需传入比较函数）";
+            }},
+            { zle_cls: "trans", zle_code: "slice(1, 3)", zle_run: function () {
+                var zle_part = zle_arr.slice(1, 3);
+                return "截取索引 1~2（不改原数组）→ [" + zle_part.join(", ") + "]";
+            }},
+            { zle_cls: "trans", zle_code: 'join("、")', zle_run: function () {
+                return "连接为字符串：" + zle_arr.join("、");
+            }},
+            { zle_cls: "trans", zle_code: 'concat(["樱桃"])', zle_run: function () {
+                var zle_newArr = zle_arr.concat(["樱桃"]);
+                return "拼接出新数组（不改原数组）→ [" + zle_newArr.join(", ") + "]";
+            }},
+            { zle_cls: "reset", zle_code: "重置数组", zle_run: function () {
+                zle_arr = zle_init.slice(); zle_lastAdded = null;
+                return "恢复为初始数组";
+            }}
+        ];
+
+        (function zle_initOps() {
+            var zle_opsEl = document.getElementById("zle_ops");
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_ops.length; zle_i++) {
+                var zle_op = zle_ops[zle_i];
+                zle_html += '<button type="button" class="zle_opbtn zle_opbtn--' +
+                    zle_op.zle_cls + '" data-zle-index="' + zle_i + '">' +
+                    zle_op.zle_code + "</button>";
+            }
+            zle_opsEl.innerHTML = zle_html;
+
+            zle_opsEl.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_op = zle_ops[Number(zle_btn.dataset.zleIndex)];
+                var zle_wasReorder = zle_op.zle_cls === "trans" &&
+                    (zle_op.zle_code === "reverse()" || zle_op.zle_code === "sort()");
+                var zle_text = zle_op.zle_run();
+                var zle_chips = document.getElementById("zle_chips");
+                zle_renderChips(zle_chips, zle_arr, zle_lastAdded);
+                if (zle_wasReorder) {
+                    zle_chips.classList.remove("zle_flip");
+                    void zle_chips.offsetWidth;
+                    zle_chips.classList.add("zle_flip");
+                }
+                zle_logOp(zle_op.zle_code, zle_text);
+            });
+        })();
+
+        zle_renderChips(document.getElementById("zle_chips"), zle_arr, null);
+
+        /* ---------- map / filter / reduce 条形图 ---------- */
+        var zle_numsInit = [5, 3, 8, 1, 4, 9, 2, 7];
+        var zle_nums = zle_numsInit.slice();
+
+        function zle_renderBars(zle_text) {
+            var zle_max = Math.max.apply(null, zle_nums);
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_nums.length; zle_i++) {
+                zle_html += '<span class="zle_bar"><i style="height:' +
+                    Math.round(zle_nums[zle_i] / zle_max * 100) + '%"></i><b>' +
+                    zle_nums[zle_i] + "</b></span>";
+            }
+            document.getElementById("zle_bars").innerHTML = zle_html;
+            document.getElementById("zle_barresult").textContent =
+                zle_text || ("当前数组：[" + zle_nums.join(", ") + "]");
+        }
+
+        var zle_numOps = [
+            { zle_code: "map(x => x * 2)", zle_run: function () {
+                zle_nums = zle_nums.map(function (zle_x) { return zle_x * 2; });
+                return "map 对每个元素乘 2，返回等长新数组";
+            }},
+            { zle_code: "filter(x => x % 2 === 0)", zle_run: function () {
+                zle_nums = zle_nums.filter(function (zle_x) { return zle_x % 2 === 0; });
+                return "filter 只保留偶数，返回新数组";
+            }},
+            { zle_code: "reduce((a, b) => a + b)", zle_run: function () {
+                var zle_total = zle_nums.reduce(function (zle_a, zle_b) { return zle_a + zle_b; });
+                return "reduce 求和 = " + zle_total + "（原数组不变）";
+            }},
+            { zle_code: "sort((a, b) => a - b)", zle_run: function () {
+                zle_nums.sort(function (zle_a, zle_b) { return zle_a - zle_b; });
+                return "数字升序排序（必须写比较函数）";
+            }},
+            { zle_code: "重置", zle_run: function () {
+                zle_nums = zle_numsInit.slice();
+                return "恢复为初始数组";
+            }}
+        ];
+
+        (function zle_initNumOps() {
+            var zle_el = document.getElementById("zle_numops");
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_numOps.length; zle_i++) {
+                zle_html += '<button type="button" class="zle_opbtn zle_opbtn--trans" data-zle-index="' +
+                    zle_i + '">' + zle_numOps[zle_i].zle_code + "</button>";
+            }
+            zle_el.innerHTML = zle_html;
+
+            zle_el.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_op = zle_numOps[Number(zle_btn.dataset.zleIndex)];
+                var zle_text = zle_op.zle_run();
+                zle_renderBars(zle_text);
+            });
+        })();
+
+        zle_renderBars();
+
+        /* ---------- 速查表 ---------- */
+        (function zle_initTable() {
+            var zle_demo = [3, 1, 4, 1, 5];
+            function zle_copy(zle_fn) {
+                var zle_a = zle_demo.slice();
+                zle_fn(zle_a);
+                return "[" + zle_a.join(", ") + "]";
+            }
+            var zle_rows = [
+                ["push(9)", "末尾添加元素，返回新长度", function () { return zle_copy(function (a) { a.push(9); }); }],
+                ["pop()", "删除末尾元素，返回该元素", function () { return String(zle_demo[zle_demo.length - 1]); }],
+                ["shift()", "删除开头元素，返回该元素", function () { return String(zle_demo[0]); }],
+                ["unshift(7)", "开头添加元素，返回新长度", function () { return zle_copy(function (a) { a.unshift(7); }); }],
+                ["splice(1, 2)", "从索引 1 删除 2 个元素", function () { return zle_copy(function (a) { a.splice(1, 2); }); }],
+                ["slice(1, 3)", "截取索引 1~2，不改原数组", function () { return "[" + zle_demo.slice(1, 3).join(", ") + "]"; }],
+                ["concat([9, 2])", "拼接数组，返回新数组", function () { return "[" + zle_demo.concat([9, 2]).join(", ") + "]"; }],
+                ['join("-")', "把元素连接成字符串", function () { return '"' + zle_demo.join("-") + '"'; }],
+                ["reverse()", "反转数组顺序", function () { return zle_copy(function (a) { a.reverse(); }); }],
+                ["sort()", "按字符串方式排序", function () { return zle_copy(function (a) { a.sort(); }); }],
+                ["indexOf(4)", "查找元素，返回索引", function () { return String(zle_demo.indexOf(4)); }],
+                ["includes(5)", "判断是否包含某元素", function () { return String(zle_demo.includes(5)); }],
+                ["map(x => x * 2)", "对每个元素加工，返回新数组", function () { return "[" + zle_demo.map(function (x) { return x * 2; }).join(", ") + "]"; }],
+                ["filter(x => x > 2)", "筛选满足条件的元素", function () { return "[" + zle_demo.filter(function (x) { return x > 2; }).join(", ") + "]"; }],
+                ["reduce((a,b)=>a+b)", "把数组归并为一个值", function () { return String(zle_demo.reduce(function (a, b) { return a + b; })); }],
+                ["find(x => x > 3)", "返回第一个满足条件的元素", function () { return String(zle_demo.find(function (x) { return x > 3; })); }]
+            ];
+
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_rows.length; zle_i++) {
+                zle_html += "<tr><td>" + zle_rows[zle_i][0] + "</td><td>" + zle_rows[zle_i][1] +
+                    "</td><td>zle_demo</td><td>" + zle_rows[zle_i][2]() + "</td></tr>";
+            }
+            document.getElementById("zle_table_body").innerHTML = zle_html;
+        })();
+    </script>
+</body>
+</html>

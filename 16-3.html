@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-10-29 14:24 | 使用大模型：GLM-5.3-Flash | 功能名称：9月之星阅读币排行榜 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9月之星 | 张珑恩</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        :root {
+            --zle_blue: #409eff;
+            --zle_red: #f56c6c;
+            --zle_ink: #303133;
+            --zle_muted: #909399;
+            --zle_line: #ebeef5;
+            --zle_border: #c0c4cc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem clamp(0.75rem, 3vw, 2rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            color: var(--zle_ink);
+            background: #f2f4f8;
+        }
+
+        .zle_card {
+            width: min(30rem, 100%);
+            background: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.4rem 1.2rem rgb(48 49 51 / 8%);
+            overflow: hidden;
+        }
+
+        .zle_tab {
+            width: 3.5rem;
+            height: 0.22rem;
+            background: var(--zle_blue);
+        }
+
+        .zle_head {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.9rem 1.1rem 0.7rem;
+        }
+
+        .zle_head h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            letter-spacing: 0.02em;
+        }
+
+        .zle_head .zle_ic_snow {
+            font-size: 1.05rem;
+            color: #a8c6e8;
+        }
+
+        .zle_more {
+            margin-left: auto;
+            font-size: 1.25rem;
+            color: var(--zle_blue);
+        }
+
+        .zle_list {
+            margin: 0;
+            padding: 0 0.4rem;
+            list-style: none;
+        }
+
+        .zle_item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 0.7rem;
+            border-bottom: 1px solid var(--zle_line);
+            transition: background 0.2s ease;
+        }
+
+        .zle_item:last-child {
+            border-bottom: none;
+        }
+
+        .zle_item:hover {
+            background: #f5f7fa;
+        }
+
+        .zle_rank {
+            flex: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+            border-radius: 0.28rem;
+            background: var(--zle_blue);
+        }
+
+        .zle_rank--top {
+            background: var(--zle_red);
+        }
+
+        .zle_avatar {
+            flex: none;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .zle_info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .zle_name {
+            font-size: 1rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .zle_like {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_coin {
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_coin-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.72rem;
+            border: 1px solid var(--zle_border);
+            border-radius: 50%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_item {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="zle_card">
+        <div class="zle_tab" aria-hidden="true"></div>
+        <header class="zle_head">
+            <h1>9月之星</h1>
+            <span class="zle_ic zle_ic_snow" aria-hidden="true"></span>
+            <span class="zle_ic zle_ic_more zle_more" aria-hidden="true"></span>
+        </header>
+        <ul class="zle_list" id="zle_list" aria-label="9月之星排行榜">
+        </ul>
+    </main>
+
+    <script>
+        var zle_stars = [
+            { zle_name: "云想衣裳花想容丶", zle_likes: 17565 },
+            { zle_name: "饮鸩止伤", zle_likes: 9028 },
+            { zle_name: "闷骚男", zle_likes: 5781 },
+            { zle_name: "mayi2000", zle_likes: 4881 },
+            { zle_name: "", zle_likes: 4162 },
+            { zle_name: "出宰", zle_likes: 4004 },
+            { zle_name: "干滟", zle_likes: 3820 },
+            { zle_name: "贴身肉搏李超人", zle_likes: 3686 },
+            { zle_name: "阿布129", zle_likes: 3352 },
+            { zle_name: "屯里人", zle_likes: 3265 }
+        ];
+
+        (function zle_render() {
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_stars.length; zle_i++) {
+                var zle_s = zle_stars[zle_i];
+                var zle_rank = zle_i + 1;
+                zle_html += '<li class="zle_item">' +
+                    '<span class="zle_rank' + (zle_rank <= 3 ? " zle_rank--top" : "") + '">' + zle_rank + "</span>" +
+                    '<img class="zle_avatar" src="img/' + (zle_i % 3 + 1) + '.jpeg" alt="用户头像">' +
+                    '<span class="zle_info">' +
+                    (zle_s.zle_name ? '<span class="zle_name">' + zle_s.zle_name + "</span>" : "") +
+                    '<span class="zle_like"><span class="zle_ic zle_ic_like" aria-hidden="true"></span>' +
+                    zle_s.zle_likes.toLocaleString().replace(/,/g, "") + "</span>" +
+                    "</span>" +
+                    '<span class="zle_coin"><span class="zle_coin-icon"><span class="zle_ic zle_ic_yen" aria-hidden="true"></span></span>50 阅读币</span>' +
+                    "</li>";
+            }
+            document.getElementById("zle_list").innerHTML = zle_html;
+        })();
+    </script>
+</body>
+</html>
