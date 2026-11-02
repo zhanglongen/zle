@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-02 13:39 | 使用大模型：GLM-5.3-Flash | 功能名称：使用 fetch 跨域获取接口数据并展示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fetch 跨域数据获取与展示 | 张珑恩</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_accent2: #32c6a6;
+            --zle_danger: #dc2626;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                radial-gradient(circle at 88% 100%, rgb(50 198 166 / 8%), transparent 45%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header_text h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header_text p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+            max-width: 48rem;
+        }
+
+        .zle_controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .zle_btn {
+            padding: 0.55rem 1.1rem;
+            font-size: 0.95rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .zle_btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .zle_btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .zle_status {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 0.6rem;
+            display: none;
+        }
+
+        .zle_status.zle_loading {
+            display: block;
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 8%);
+        }
+
+        .zle_status.zle_error {
+            display: block;
+            color: var(--zle_danger);
+            background: rgb(220 38 38 / 8%);
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+        }
+
+        .zle_card {
+            display: flex;
+            flex-direction: column;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .zle_card:hover {
+            transform: translateY(-0.25rem);
+            border-color: var(--zle_accent);
+            box-shadow: 0 1rem 2rem rgb(31 45 61 / 12%);
+        }
+
+        .zle_card_img_wrap {
+            height: 10rem;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .zle_card_img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .zle_card:hover .zle_card_img {
+            transform: scale(1.05);
+        }
+
+        .zle_card_body {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .zle_card_title {
+            margin: 0 0 0.35rem;
+            font-size: 1rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .zle_card_price {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--zle_accent);
+        }
+
+        .zle_card_meta {
+            margin-top: auto;
+            font-size: 0.8rem;
+            color: var(--zle_muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .zle_empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_modal_overlay {
+            position: fixed;
+            inset: 0;
+            background: rgb(0 0 0 / 45%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .zle_modal_overlay.zle_open {
+            display: flex;
+        }
+
+        .zle_modal {
+            width: min(40rem, 100%);
+            max-height: calc(100vh - 2rem);
+            background: var(--zle_surface);
+            border-radius: var(--zle_radius);
+            box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 20%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .zle_modal_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--zle_line);
+        }
+
+        .zle_modal_header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .zle_modal_close {
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            background: transparent;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--zle_muted);
+            cursor: pointer;
+            border-radius: 0.4rem;
+            transition: background 0.2s ease;
+        }
+
+        .zle_modal_close:hover {
+            background: var(--zle_line);
+        }
+
+        .zle_modal_body {
+            padding: 1.25rem;
+            overflow-y: auto;
+        }
+
+        .zle_detail_layout {
+            display: grid;
+            grid-template-columns: 12rem 1fr;
+            gap: 1.25rem;
+        }
+
+        .zle_detail_img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            background: #f8fafc;
+            border-radius: 0.6rem;
+            padding: 0.5rem;
+        }
+
+        .zle_detail_info p {
+            margin: 0 0 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .zle_detail_label {
+            color: var(--zle_muted);
+        }
+
+        .zle_detail_price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--zle_accent);
+        }
+
+        .zle_badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            color: #0a7d4d;
+            background: rgb(50 198 166 / 14%);
+            border-radius: 999px;
+            margin-right: 0.35rem;
+        }
+
+        .zle_code {
+            margin: 0.75rem 0 0;
+            padding: 0.75rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.8rem;
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (max-width: 40rem) {
+            .zle_grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .zle_detail_layout {
+                grid-template-columns: 1fr;
+            }
+
+            .zle_detail_img {
+                max-width: 14rem;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 24rem) {
+            .zle_grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_card,
+            .zle_card_img,
+            .zle_btn,
+            .zle_modal_close {
+                transition: none;
+            }
+
+            .zle_card:hover {
+                transform: none;
+            }
+
+            .zle_card:hover .zle_card_img {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <div class="zle_header_text">
+                <h1>fetch 跨域数据获取与展示</h1>
+                <p>本页使用原生 fetch() 从 <code>https://dummyjson.com/products</code> 获取商品列表（CORS 已开放），并支持点击卡片查看单个商品详情。</p>
+            </div>
+            <div class="zle_controls">
+                <button id="zle_reload_btn" class="zle_btn" type="button">
+                    <span class="zle_ic zle_ic_more" aria-hidden="true"></span>
+                    重新加载
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div id="zle_status" class="zle_status" role="status" aria-live="polite"></div>
+
+            <section id="zle_product_grid" class="zle_grid" aria-label="商品列表">
+                <div class="zle_empty">点击“重新加载”获取商品数据。</div>
+            </section>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <div id="zle_modal" class="zle_modal_overlay" role="dialog" aria-modal="true" aria-labelledby="zle_modal_title">
+        <div class="zle_modal">
+            <div class="zle_modal_header">
+                <h2 id="zle_modal_title">商品详情</h2>
+                <button id="zle_modal_close" class="zle_modal_close" type="button" aria-label="关闭">×</button>
+            </div>
+            <div id="zle_modal_body" class="zle_modal_body">
+                <p>加载中……</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var zle_apiList = "https://dummyjson.com/products?limit=8";
+        var zle_apiDetail = "https://dummyjson.com/products/";
+
+        var zle_grid = document.getElementById("zle_product_grid");
+        var zle_status = document.getElementById("zle_status");
+        var zle_modal = document.getElementById("zle_modal");
+        var zle_modalBody = document.getElementById("zle_modal_body");
+        var zle_modalClose = document.getElementById("zle_modal_close");
+
+        function zle_setStatus(zle_type, zle_message) {
+            zle_status.className = "zle_status " + (zle_type || "");
+            zle_status.textContent = zle_message || "";
+        }
+
+        function zle_escapeHtml(zle_text) {
+            return String(zle_text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        async function zle_loadProducts() {
+            zle_setStatus("zle_loading", "正在从服务器获取商品列表，请稍候……");
+            zle_grid.innerHTML = '<div class="zle_empty">加载中……</div>';
+
+            try {
+                var zle_response = await fetch(zle_apiList);
+                if (!zle_response.ok) {
+                    throw new Error("HTTP 状态码：" + zle_response.status);
+                }
+                var zle_data = await zle_response.json();
+                zle_renderList(zle_data.products || []);
+                zle_setStatus("", "");
+            } catch (zle_err) {
+                zle_setStatus("zle_error", "获取数据失败：" + zle_err.message);
+                zle_grid.innerHTML = '<div class="zle_empty">数据加载失败，请检查网络后点击“重新加载”。</div>';
+            }
+        }
+
+        function zle_renderList(zle_products) {
+            if (!zle_products.length) {
+                zle_grid.innerHTML = '<div class="zle_empty">暂无商品数据。</div>';
+                return;
+            }
+
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_products.length; zle_i++) {
+                var zle_p = zle_products[zle_i];
+                zle_html +=
+                    '<article class="zle_card" data-id="' + zle_p.id + '" tabindex="0" role="button" aria-label="查看 ' + zle_escapeHtml(zle_p.title) + ' 详情">' +
+                        '<div class="zle_card_img_wrap">' +
+                            '<img class="zle_card_img" src="' + zle_escapeHtml(zle_p.thumbnail) + '" alt="' + zle_escapeHtml(zle_p.title) + '" loading="lazy">' +
+                        '</div>' +
+                        '<div class="zle_card_body">' +
+                            '<h2 class="zle_card_title">' + zle_escapeHtml(zle_p.title) + '</h2>' +
+                            '<p class="zle_card_price">$' + zle_p.price + '</p>' +
+                            '<p class="zle_card_meta"><span class="zle_ic zle_ic_like" aria-hidden="true"></span>' + zle_p.rating + ' 分 · 库存 ' + zle_p.stock + '</p>' +
+                        '</div>' +
+                    '</article>';
+            }
+            zle_grid.innerHTML = zle_html;
+
+            var zle_cards = zle_grid.querySelectorAll(".zle_card");
+            for (var zle_j = 0; zle_j < zle_cards.length; zle_j++) {
+                zle_cards[zle_j].addEventListener("click", function () {
+                    zle_openDetail(Number(this.getAttribute("data-id")));
+                });
+                zle_cards[zle_j].addEventListener("keydown", function (zle_ev) {
+                    if (zle_ev.key === "Enter" || zle_ev.key === " ") {
+                        zle_ev.preventDefault();
+                        zle_openDetail(Number(this.getAttribute("data-id")));
+                    }
+                });
+            }
+        }
+
+        async function zle_openDetail(zle_id) {
+            zle_modal.classList.add("zle_open");
+            zle_modalBody.innerHTML = "<p>正在加载商品详情……</p>";
+
+            try {
+                var zle_response = await fetch(zle_apiDetail + zle_id);
+                if (!zle_response.ok) {
+                    throw new Error("HTTP 状态码：" + zle_response.status);
+                }
+                var zle_p = await zle_response.json();
+                zle_renderDetail(zle_p);
+            } catch (zle_err) {
+                zle_modalBody.innerHTML = "<p>加载详情失败：" + zle_escapeHtml(zle_err.message) + "</p>";
+            }
+        }
+
+        function zle_renderDetail(zle_p) {
+            var zle_tags = "";
+            if (zle_p.tags && zle_p.tags.length) {
+                for (var zle_i = 0; zle_i < zle_p.tags.length; zle_i++) {
+                    zle_tags += '<span class="zle_badge">' + zle_escapeHtml(zle_p.tags[zle_i]) + '</span>';
+                }
+            }
+
+            var zle_gallery = "";
+            if (zle_p.images && zle_p.images.length) {
+                zle_gallery = '<p class="zle_detail_label">商品图集：</p><div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.5rem 0 0;">';
+                for (var zle_j = 0; zle_j < zle_p.images.length && zle_j < 4; zle_j++) {
+                    zle_gallery += '<img src="' + zle_escapeHtml(zle_p.images[zle_j]) + '" alt="" style="width:4.5rem;height:4.5rem;object-fit:contain;background:#f8fafc;border-radius:0.4rem;padding:0.25rem;">';
+                }
+                zle_gallery += '</div>';
+            }
+
+            zle_modalBody.innerHTML =
+                '<div class="zle_detail_layout">' +
+                    '<img class="zle_detail_img" src="' + zle_escapeHtml(zle_p.thumbnail) + '" alt="' + zle_escapeHtml(zle_p.title) + '">' +
+                    '<div class="zle_detail_info">' +
+                        '<h2>' + zle_escapeHtml(zle_p.title) + '</h2>' +
+                        '<p class="zle_detail_price">$' + zle_p.price + '</p>' +
+                        '<p>' + zle_tags + '</p>' +
+                        '<p><span class="zle_detail_label">品牌：</span>' + zle_escapeHtml(zle_p.brand || "—") + '</p>' +
+                        '<p><span class="zle_detail_label">分类：</span>' + zle_escapeHtml(zle_p.category || "—") + '</p>' +
+                        '<p><span class="zle_detail_label">评分：</span>' + zle_p.rating + ' / 5</p>' +
+                        '<p><span class="zle_detail_label">库存：</span>' + zle_p.stock + '</p>' +
+                        '<p><span class="zle_detail_label">描述：</span>' + zle_escapeHtml(zle_p.description || "暂无描述") + '</p>' +
+                        zle_gallery +
+                        '<div class="zle_code">fetch("' + zle_apiDetail + zle_p.id + '")\n  .then(r =&gt; r.json())\n  .then(data =&gt; { ... });</div>' +
+                    '</div>' +
+                '</div>';
+        }
+
+        function zle_closeDetail() {
+            zle_modal.classList.remove("zle_open");
+            zle_modalBody.innerHTML = "<p>加载中……</p>";
+        }
+
+        document.getElementById("zle_reload_btn").addEventListener("click", zle_loadProducts);
+        zle_modalClose.addEventListener("click", zle_closeDetail);
+        zle_modal.addEventListener("click", function (zle_ev) {
+            if (zle_ev.target === zle_modal) {
+                zle_closeDetail();
+            }
+        });
+        document.addEventListener("keydown", function (zle_ev) {
+            if (zle_ev.key === "Escape" && zle_modal.classList.contains("zle_open")) {
+                zle_closeDetail();
+            }
+        });
+
+        // 页面加载后自动获取数据
+        zle_loadProducts();
+    </script>
+</body>
+</html>

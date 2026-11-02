@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-02 13:39 | 使用大模型：Auto | 功能名称：JSON 数据展示与解析演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 数据展示与解析 | 张珑恩</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_accent2: #32c6a6;
+            --zle_warn: #f59e0b;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(circle at 12% 0%, rgb(47 111 237 / 8%), transparent 55%),
+                radial-gradient(circle at 88% 100%, rgb(50 198 166 / 8%), transparent 45%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(72rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header {
+            margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        .zle_header p {
+            margin: 0;
+            color: var(--zle_muted);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+            max-width: 48rem;
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+        }
+
+        .zle_card {
+            padding: 1.25rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .zle_card:hover {
+            transform: translateY(-0.25rem);
+            border-color: var(--zle_accent);
+        }
+
+        .zle_card h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zle_card > p {
+            margin: 0 0 0.9rem;
+            color: var(--zle_muted);
+            font-size: 0.9rem;
+        }
+
+        .zle_tag {
+            margin-left: auto;
+            padding: 0.15rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 10%);
+            border-radius: 999px;
+        }
+
+        .zle_tag.zle_tag_green {
+            color: #0a7d4d;
+            background: rgb(50 198 166 / 14%);
+        }
+
+        .zle_code {
+            margin: 0;
+            padding: 0.9rem;
+            font-family: Consolas, "Courier New", "Microsoft YaHei", monospace;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.6rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .zle_json_key {
+            color: #0550ae;
+        }
+
+        .zle_json_string {
+            color: #0a7d4d;
+        }
+
+        .zle_json_number {
+            color: #d1240f;
+        }
+
+        .zle_json_boolean {
+            color: #9a6700;
+        }
+
+        .zle_json_null {
+            color: #6e7781;
+        }
+
+        .zle_json_bracket {
+            color: #1f2d3d;
+        }
+
+        .zle_table_wrap {
+            overflow-x: auto;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.6rem;
+        }
+
+        .zle_table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .zle_table th,
+        .zle_table td {
+            padding: 0.65rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--zle_line);
+        }
+
+        .zle_table th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .zle_table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .zle_field {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.9rem 0 0;
+        }
+
+        .zle_input,
+        .zle_textarea {
+            flex: 1 1 100%;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.95rem;
+            color: var(--zle_ink);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .zle_textarea {
+            min-height: 5rem;
+            resize: vertical;
+        }
+
+        .zle_input:focus,
+        .zle_textarea:focus {
+            outline: 2px solid var(--zle_accent);
+            outline-offset: 1px;
+            border-color: transparent;
+        }
+
+        .zle_btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .zle_btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .zle_btn_secondary {
+            background: var(--zle_accent2);
+        }
+
+        .zle_result {
+            margin: 0.75rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--zle_ink);
+            background: #effaf3;
+            border-radius: 0.6rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 2.5rem;
+        }
+
+        .zle_result.zle_empty {
+            color: var(--zle_muted);
+            background: #f8fafc;
+        }
+
+        .zle_note {
+            margin: 1.5rem 0 0;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (max-width: 40rem) {
+            .zle_grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_card {
+                transition: none;
+            }
+
+            .zle_card:hover {
+                transform: none;
+            }
+
+            .zle_btn {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>JSON 数据展示与解析</h1>
+            <p>JSON（JavaScript Object Notation）是一种轻量级数据交换格式。本页展示 JSON 的结构、格式化高亮显示，以及 JSON.stringify 与 JSON.parse 的互相转换过程。</p>
+        </header>
+
+        <main>
+            <section class="zle_grid" aria-label="JSON 展示与解析演示">
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_more" aria-hidden="true"></span>什么是 JSON？<span class="zle_tag">概念</span></h2>
+                    <p>JSON 使用键值对保存数据，支持字符串、数字、布尔值、null、数组和嵌套对象。语法与 JavaScript 对象字面量相似，但键名必须用双引号包裹。</p>
+                    <div class="zle_code">{
+  <span class="zle_json_key">"name"</span>: <span class="zle_json_string">"张珑恩"</span>,
+  <span class="zle_json_key">"age"</span>: <span class="zle_json_number">20</span>,
+  <span class="zle_json_key">"isStudent"</span>: <span class="zle_json_boolean">true</span>,
+  <span class="zle_json_key">"courses"</span>: [<span class="zle_json_string">"HTML"</span>, <span class="zle_json_string">"CSS"</span>, <span class="zle_json_string">"JavaScript"</span>]
+}</div>
+                </article>
+
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_like" aria-hidden="true"></span>学生信息 JSON<span class="zle_tag">对象</span></h2>
+                    <p>一个嵌套对象示例：包含字符串、数字、布尔值、数组和子对象。</p>
+                    <div id="zle_student_json" class="zle_code"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_snow" aria-hidden="true"></span>课程成绩列表<span class="zle_tag zle_tag_green">数组</span></h2>
+                    <p>将 JSON 数组渲染为表格，直观展示对象数组的读取方式。</p>
+                    <div id="zle_score_table" class="zle_table_wrap"></div>
+                </article>
+
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_yen" aria-hidden="true"></span>JSON.stringify<span class="zle_tag">对象→字符串</span></h2>
+                    <p>输入一个 JavaScript 对象，点击按钮查看转换后的 JSON 字符串。</p>
+                    <textarea id="zle_stringify_input" class="zle_textarea" aria-label="待转换的 JavaScript 对象">{ "product": "耳机", "price": 199, "stock": 12 }</textarea>
+                    <div class="zle_field">
+                        <button id="zle_stringify_btn" class="zle_btn" type="button">转换为 JSON 字符串</button>
+                    </div>
+                    <div id="zle_stringify_out" class="zle_result zle_empty">结果将显示在这里……</div>
+                </article>
+
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_more" aria-hidden="true"></span>JSON.parse<span class="zle_tag">字符串→对象</span></h2>
+                    <p>输入一段 JSON 字符串，点击按钮解析为 JavaScript 对象并访问属性。</p>
+                    <textarea id="zle_parse_input" class="zle_textarea" aria-label="待解析的 JSON 字符串">{ "city": "杭州", "temp": 24, "sunny": true }</textarea>
+                    <div class="zle_field">
+                        <button id="zle_parse_btn" class="zle_btn zle_btn_secondary" type="button">解析为对象</button>
+                    </div>
+                    <div id="zle_parse_out" class="zle_result zle_empty">结果将显示在这里……</div>
+                </article>
+
+                <article class="zle_card">
+                    <h2><span class="zle_ic zle_ic_like" aria-hidden="true"></span>本地 JSON 文件思路<span class="zle_tag">扩展</span></h2>
+                    <p>实际项目中，JSON 数据通常来自服务器或本地 .json 文件，使用 fetch 读取后再用 JSON.parse 或 .json() 方法解析。</p>
+                    <div class="zle_code">fetch(<span class="zle_json_string">'data.json'</span>)
+  .then(zle_r =&gt; zle_r.json())
+  .then(zle_data =&gt; {
+    console.log(zle_data);
+  });</div>
+                </article>
+            </section>
+
+            <aside class="zle_note">
+                <strong>小结：</strong>JSON 是网页与服务器之间最常用的数据格式。通过 <code>JSON.stringify()</code> 可以把对象变成字符串便于传输；通过 <code>JSON.parse()</code> 可以把字符串还原为对象便于在页面中渲染。本页所有类名、id 与变量名均以 zle_ 开头。
+            </aside>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        // 高亮 JSON 字符串（简单的语法高亮）
+        function zle_highlightJson(zle_json) {
+            return zle_json
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="zle_json_string">$1</span>')
+                .replace(/\b(true|false)\b/g, '<span class="zle_json_boolean">$1</span>')
+                .replace(/\b(null)\b/g, '<span class="zle_json_null">$1</span>')
+                .replace(/(-?\d+\.?\d*)/g, '<span class="zle_json_number">$1</span>')
+                .replace(/"([^"]*)"(?=\s*:)/g, '<span class="zle_json_key">"$1"</span>');
+        }
+
+        // 示例数据
+        var zle_student = {
+            zle_name: "张珑恩",
+            zle_age: 20,
+            zle_major: "网页设计",
+            zle_isStudent: true,
+            zle_scores: { zle_html: 92, zle_css: 88, zle_js: 90 },
+            zle_courses: ["HTML5", "CSS3", "JavaScript", "响应式设计"]
+        };
+
+        var zle_scoreList = [
+            { zle_course: "HTML5", zle_score: 92, zle_pass: true },
+            { zle_course: "CSS3", zle_score: 88, zle_pass: true },
+            { zle_course: "JavaScript", zle_score: 90, zle_pass: true },
+            { zle_course: "响应式设计", zle_score: 85, zle_pass: true }
+        ];
+
+        // 渲染学生信息 JSON
+        document.getElementById("zle_student_json").innerHTML = zle_highlightJson(
+            JSON.stringify(zle_student, null, 2)
+        );
+
+        // 渲染成绩表格
+        (function () {
+            var zle_html = '<table class="zle_table"><thead><tr><th>课程</th><th>成绩</th><th>是否及格</th></tr></thead><tbody>';
+            for (var zle_i = 0; zle_i < zle_scoreList.length; zle_i++) {
+                var zle_item = zle_scoreList[zle_i];
+                zle_html += '<tr><td>' + zle_item.zle_course + '</td><td>' + zle_item.zle_score + '</td><td>' + (zle_item.zle_pass ? '是' : '否') + '</td></tr>';
+            }
+            zle_html += '</tbody></table>';
+            document.getElementById("zle_score_table").innerHTML = zle_html;
+        })();
+
+        // stringify 交互
+        document.getElementById("zle_stringify_btn").addEventListener("click", function () {
+            var zle_input = document.getElementById("zle_stringify_input").value;
+            var zle_out = document.getElementById("zle_stringify_out");
+            try {
+                var zle_obj = new Function("return " + zle_input)();
+                var zle_str = JSON.stringify(zle_obj, null, 2);
+                zle_out.innerHTML = zle_highlightJson(zle_str);
+                zle_out.classList.remove("zle_empty");
+            } catch (zle_err) {
+                zle_out.textContent = "转换失败，请检查对象语法：" + zle_err.message;
+                zle_out.classList.add("zle_empty");
+            }
+        });
+
+        // parse 交互
+        document.getElementById("zle_parse_btn").addEventListener("click", function () {
+            var zle_input = document.getElementById("zle_parse_input").value;
+            var zle_out = document.getElementById("zle_parse_out");
+            try {
+                var zle_obj = JSON.parse(zle_input);
+                var zle_text = "解析成功！\n";
+                for (var zle_key in zle_obj) {
+                    if (zle_obj.hasOwnProperty(zle_key)) {
+                        zle_text += zle_key + " = " + zle_obj[zle_key] + "（类型：" + typeof zle_obj[zle_key] + "）\n";
+                    }
+                }
+                zle_out.textContent = zle_text;
+                zle_out.classList.remove("zle_empty");
+            } catch (zle_err) {
+                zle_out.textContent = "解析失败，请检查 JSON 语法：" + zle_err.message;
+                zle_out.classList.add("zle_empty");
+            }
+        });
+    </script>
+</body>
+</html>

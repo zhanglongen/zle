@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-02 13:52 | 使用大模型：GLM-5.3-Flash | 功能名称：远程接口测试工具（GET/POST 等，fetch 实现） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接口测试工具 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_danger: #dc2626;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+            --zle_code_font: Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(60rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_panel {
+            margin-bottom: 1.5rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel h2 {
+            margin: 0 0 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .zle_urlrow {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .zle_method {
+            flex: none;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.95rem;
+            font-family: var(--zle_code_font);
+            font-weight: 700;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .zle_url {
+            flex: 1;
+            min-width: 14rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.95rem;
+            font-family: var(--zle_code_font);
+            color: var(--zle_ink);
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+        }
+
+        .zle_url:focus {
+            outline: none;
+            border-color: var(--zle_accent);
+        }
+
+        .zle_send {
+            flex: none;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.95rem;
+            color: #fff;
+            background: var(--zle_ok);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .zle_send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .zle_body_label {
+            margin: 0.8rem 0 0.3rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            display: none;
+        }
+
+        .zle_body_label.zle_show {
+            display: block;
+        }
+
+        .zle_body {
+            width: 100%;
+            height: 6.5rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.88rem;
+            font-family: var(--zle_code_font);
+            color: var(--zle_ink);
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+            resize: vertical;
+            display: none;
+        }
+
+        .zle_body.zle_show {
+            display: block;
+        }
+
+        .zle_presets {
+            margin-top: 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .zle_preset {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.8rem;
+            font-family: var(--zle_code_font);
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 8%);
+            border: 1px solid rgb(47 111 237 / 25%);
+            border-radius: 0.45rem;
+            cursor: pointer;
+        }
+
+        .zle_preset:hover {
+            background: rgb(47 111 237 / 16%);
+        }
+
+        .zle_result_meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.7rem;
+            min-height: 1.6rem;
+            font-size: 0.88rem;
+        }
+
+        .zle_badge {
+            padding: 0.15rem 0.6rem;
+            font-family: var(--zle_code_font);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+            border-radius: 0.4rem;
+            background: #94a3b8;
+        }
+
+        .zle_badge.zle_ok {
+            background: var(--zle_ok);
+        }
+
+        .zle_badge.zle_fail {
+            background: var(--zle_danger);
+        }
+
+        .zle_msg {
+            font-size: 0.88rem;
+        }
+
+        .zle_msg.zle_err {
+            color: var(--zle_danger);
+        }
+
+        .zle_headers {
+            margin: 0 0 0.7rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+            font-family: var(--zle_code_font);
+            color: var(--zle_muted);
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .zle_headers.zle_show {
+            display: block;
+        }
+
+        .zle_headers b {
+            color: var(--zle_ink);
+        }
+
+        .zle_output {
+            margin: 0;
+            padding: 0.8rem;
+            min-height: 6rem;
+            max-height: 28rem;
+            overflow: auto;
+            font-family: var(--zle_code_font);
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--zle_ink);
+            background: #0f172a;
+            color: #d7e3f4;
+            border-radius: 0.6rem;
+        }
+
+        .zle_output.zle_errtext {
+            color: #ffb4b4;
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_preset,
+            .zle_send {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>远程接口测试工具</h1>
+            <p>使用原生 fetch() 发送 GET / POST / PUT / PATCH / DELETE 请求，展示返回数据与错误信息。POST 示例接口：<code>https://jsonplaceholder.typicode.com/posts</code>。</p>
+        </header>
+
+        <section class="zle_panel" aria-label="请求设置">
+            <h2>请求</h2>
+            <div class="zle_urlrow">
+                <select id="zle_method" class="zle_method" aria-label="请求方法">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <input id="zle_url" class="zle_url" type="text" value="https://jsonplaceholder.typicode.com/posts" spellcheck="false" aria-label="接口地址">
+                <button id="zle_send" class="zle_send" type="button">发送</button>
+            </div>
+            <p id="zle_body_label" class="zle_body_label">请求体（JSON）：</p>
+            <textarea id="zle_body" class="zle_body" spellcheck="false" aria-label="请求体"></textarea>
+            <div class="zle_presets" id="zle_presets" aria-label="示例请求"></div>
+        </section>
+
+        <section class="zle_panel" aria-label="响应结果">
+            <h2>响应</h2>
+            <div class="zle_result_meta">
+                <span id="zle_status_badge" class="zle_badge">待发送</span>
+                <span id="zle_msg" class="zle_msg">填写地址后点击“发送”。</span>
+            </div>
+            <div id="zle_headers" class="zle_headers"></div>
+            <pre id="zle_output" class="zle_output">（这里显示接口返回的数据）</pre>
+        </section>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        var zle_methodSel = document.getElementById("zle_method");
+        var zle_urlInput = document.getElementById("zle_url");
+        var zle_bodyInput = document.getElementById("zle_body");
+        var zle_bodyLabel = document.getElementById("zle_body_label");
+        var zle_sendBtn = document.getElementById("zle_send");
+        var zle_badge = document.getElementById("zle_status_badge");
+        var zle_msg = document.getElementById("zle_msg");
+        var zle_headersBox = document.getElementById("zle_headers");
+        var zle_output = document.getElementById("zle_output");
+
+        var zle_presets = [
+            { zle_label: "GET 商品列表", zle_method: "GET", zle_url: "https://dummyjson.com/products?limit=8", zle_body: "" },
+            { zle_label: "GET 单篇帖子", zle_method: "GET", zle_url: "https://jsonplaceholder.typicode.com/posts/1", zle_body: "" },
+            { zle_label: "POST 新建帖子", zle_method: "POST", zle_url: "https://jsonplaceholder.typicode.com/posts", zle_body: '{\n  "title": "张珑恩的测试帖子",\n  "body": "这是用 fetch 发送的请求体。",\n  "userId": 1\n}' },
+            { zle_label: "PUT 更新帖子", zle_method: "PUT", zle_url: "https://jsonplaceholder.typicode.com/posts/1", zle_body: '{\n  "id": 1,\n  "title": "更新后的标题",\n  "body": "更新后的内容。",\n  "userId": 1\n}' },
+            { zle_label: "DELETE 帖子", zle_method: "DELETE", zle_url: "https://jsonplaceholder.typicode.com/posts/1", zle_body: "" },
+            { zle_label: "404 错误示例", zle_method: "GET", zle_url: "https://jsonplaceholder.typicode.com/none", zle_body: "" },
+            { zle_label: "网络错误示例", zle_method: "GET", zle_url: "https://no-such-host.zle.invalid/api", zle_body: "" }
+        ];
+
+        function zle_toggleBody() {
+            var zle_need = ["POST", "PUT", "PATCH"].indexOf(zle_methodSel.value) >= 0;
+            zle_bodyInput.classList.toggle("zle_show", zle_need);
+            zle_bodyLabel.classList.toggle("zle_show", zle_need);
+        }
+
+        function zle_setMeta(zle_badgeText, zle_badgeClass, zle_text, zle_isErr) {
+            zle_badge.textContent = zle_badgeText;
+            zle_badge.className = "zle_badge " + (zle_badgeClass || "");
+            zle_msg.textContent = zle_text;
+            zle_msg.className = "zle_msg" + (zle_isErr ? " zle_err" : "");
+        }
+
+        function zle_escapeHtml(zle_text) {
+            return String(zle_text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        async function zle_sendRequest() {
+            var zle_method = zle_methodSel.value;
+            var zle_url = zle_urlInput.value.trim();
+
+            if (!zle_url) {
+                zle_setMeta("未发送", "", "请先填写接口地址。", true);
+                return;
+            }
+
+            zle_sendBtn.disabled = true;
+            zle_setMeta("请求中", "", zle_method + " " + zle_url + " …", false);
+            zle_headersBox.classList.remove("zle_show");
+            zle_output.classList.remove("zle_errtext");
+            zle_output.textContent = "等待服务器响应……";
+
+            var zle_options = { method: zle_method, headers: {} };
+            var zle_bodyText = zle_bodyInput.value.trim();
+            var zle_hasBody = ["POST", "PUT", "PATCH"].indexOf(zle_method) >= 0 && zle_bodyText !== "";
+            if (zle_hasBody) {
+                zle_options.headers = { "Content-Type": "application/json" };
+                zle_options.body = zle_bodyText;
+            }
+
+            var zle_controller = new AbortController();
+            zle_options.signal = zle_controller.signal;
+            var zle_timer = setTimeout(function () { zle_controller.abort(); }, 15000);
+            var zle_start = performance.now();
+
+            try {
+                var zle_response = await fetch(zle_url, zle_options);
+                var zle_cost = Math.round(performance.now() - zle_start);
+
+                var zle_headerHtml = "";
+                zle_response.headers.forEach(function (zle_v, zle_k) {
+                    zle_headerHtml += "<b>" + zle_escapeHtml(zle_k) + "</b>: " + zle_escapeHtml(zle_v) + "\n";
+                });
+                zle_headersBox.innerHTML = zle_headerHtml;
+                zle_headersBox.classList.add("zle_show");
+
+                var zle_raw = await zle_response.text();
+                var zle_pretty = zle_raw;
+                try {
+                    zle_pretty = JSON.stringify(JSON.parse(zle_raw), null, 2);
+                } catch (zle_e) { /* 响应不是 JSON，原样显示 */ }
+
+                if (zle_response.ok) {
+                    zle_setMeta(zle_response.status + " OK", "zle_ok",
+                        "请求成功，耗时 " + zle_cost + "ms。", false);
+                } else {
+                    zle_setMeta(zle_response.status, "zle_fail",
+                        "接口返回错误：" + zle_response.status + " " + zle_response.statusText + "，耗时 " + zle_cost + "ms。", true);
+                    zle_output.classList.add("zle_errtext");
+                }
+                zle_output.textContent = zle_pretty || "（空响应）";
+            } catch (zle_err) {
+                zle_setMeta("失败", "zle_fail", "", true);
+                zle_output.classList.add("zle_errtext");
+                if (zle_err.name === "AbortError") {
+                    zle_msg.textContent = "请求超时（15 秒），已自动中断。请检查接口地址或网络。";
+                    zle_output.textContent = "AbortError: 请求超时，已中断。";
+                } else if (zle_err.name === "TypeError") {
+                    zle_msg.textContent = "网络错误或跨域被拒绝（TypeError: Failed to fetch）。请检查地址是否可访问、是否支持 CORS。";
+                    zle_output.textContent = "TypeError: Failed to fetch\n\n常见原因：\n1. 域名无法解析（地址写错或断网）\n2. 服务器不支持 CORS 跨域访问\n3. HTTPS 页面请求了 HTTP 接口（混合内容被拦截）";
+                } else {
+                    zle_msg.textContent = "请求出错：" + zle_err.message;
+                    zle_output.textContent = zle_err.name + ": " + zle_err.message;
+                }
+            } finally {
+                clearTimeout(zle_timer);
+                zle_sendBtn.disabled = false;
+            }
+        }
+
+        (function zle_initPresets() {
+            var zle_html = "";
+            for (var zle_i = 0; zle_i < zle_presets.length; zle_i++) {
+                zle_html += '<button type="button" class="zle_preset" data-zle-index="' + zle_i + '">' +
+                    zle_presets[zle_i].zle_label + "</button>";
+            }
+            var zle_box = document.getElementById("zle_presets");
+            zle_box.innerHTML = zle_html;
+            zle_box.addEventListener("click", function (zle_ev) {
+                var zle_btn = zle_ev.target.closest("button");
+                if (!zle_btn) { return; }
+                var zle_p = zle_presets[Number(zle_btn.dataset.zleIndex)];
+                zle_methodSel.value = zle_p.zle_method;
+                zle_urlInput.value = zle_p.zle_url;
+                zle_bodyInput.value = zle_p.zle_body;
+                zle_toggleBody();
+            });
+        })();
+
+        zle_methodSel.addEventListener("change", zle_toggleBody);
+        zle_sendBtn.addEventListener("click", zle_sendRequest);
+        zle_urlInput.addEventListener("keydown", function (zle_ev) {
+            if (zle_ev.key === "Enter") { zle_sendRequest(); }
+        });
+        zle_toggleBody();
+    </script>
+</body>
+</html>

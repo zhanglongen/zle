@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-02 13:49 | 使用大模型：GLM-5.3-Flash | 功能名称：商品详情页（根据 ID fetch 接口数据） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(56rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 1.2rem;
+            font-size: 0.95rem;
+            color: var(--zle_accent);
+            text-decoration: none;
+        }
+
+        .zle_back:hover {
+            text-decoration: underline;
+        }
+
+        .zle_status {
+            margin-bottom: 1rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 0.6rem;
+            display: none;
+        }
+
+        .zle_status.zle_loading {
+            display: block;
+            color: var(--zle_accent);
+            background: rgb(47 111 237 / 8%);
+        }
+
+        .zle_status.zle_error {
+            display: block;
+            color: #dc2626;
+            background: rgb(220 38 38 / 8%);
+        }
+
+        .zle_detail {
+            display: grid;
+            grid-template-columns: 17rem 1fr;
+            gap: 1.5rem;
+            padding: clamp(1.1rem, 3vw, 1.75rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_detail_img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            background: #f8fafc;
+            border-radius: 0.6rem;
+            padding: 0.6rem;
+        }
+
+        .zle_detail_title {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.25rem, 3vw, 1.6rem);
+        }
+
+        .zle_detail_price {
+            margin: 0 0 0.8rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--zle_accent);
+        }
+
+        .zle_props {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .zle_props li {
+            padding: 0.4rem 0;
+            font-size: 0.95rem;
+            border-bottom: 1px dashed var(--zle_line);
+        }
+
+        .zle_props li:last-child {
+            border-bottom: none;
+        }
+
+        .zle_prop_label {
+            display: inline-block;
+            min-width: 4.5rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_gallery {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
+        }
+
+        .zle_gallery img {
+            width: 4.5rem;
+            height: 4.5rem;
+            object-fit: contain;
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.4rem;
+            padding: 0.25rem;
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (max-width: 40rem) {
+            .zle_detail {
+                grid-template-columns: 1fr;
+            }
+
+            .zle_detail_img {
+                max-width: 16rem;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <a class="zle_back" href="17-3.html">← 返回商品列表</a>
+
+        <div id="zle_status" class="zle_status" role="status" aria-live="polite"></div>
+
+        <main>
+            <article id="zle_detail" class="zle_detail" aria-label="商品详情">
+                <p style="color:var(--zle_muted)">加载中……</p>
+            </article>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        var zle_apiBase = "https://dummyjson.com/products/";
+        var zle_detail = document.getElementById("zle_detail");
+        var zle_status = document.getElementById("zle_status");
+
+        function zle_setStatus(zle_type, zle_message) {
+            zle_status.className = "zle_status " + (zle_type || "");
+            zle_status.textContent = zle_message || "";
+        }
+
+        function zle_escapeHtml(zle_text) {
+            return String(zle_text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        /* 从地址栏读取 ?id=N，默认 1（即接口示例 https://dummyjson.com/products/1） */
+        function zle_getId() {
+            var zle_id = new URLSearchParams(location.search).get("id");
+            zle_id = Number(zle_id);
+            return (zle_id >= 1 && zle_id <= 194) ? zle_id : 1;
+        }
+
+        async function zle_loadDetail() {
+            var zle_id = zle_getId();
+            document.title = "商品详情 #" + zle_id + " | 张珑恩";
+            zle_setStatus("zle_loading", "正在获取商品 #" + zle_id + " 的详情……");
+
+            try {
+                var zle_response = await fetch(zle_apiBase + zle_id);
+                if (!zle_response.ok) {
+                    throw new Error("HTTP 状态码：" + zle_response.status);
+                }
+                var zle_p = await zle_response.json();
+                zle_setStatus("", "");
+                zle_renderDetail(zle_p);
+            } catch (zle_err) {
+                zle_setStatus("zle_error", "获取数据失败：" + zle_err.message);
+                zle_detail.innerHTML = '<p style="color:var(--zle_muted)">加载失败，请检查网络后刷新重试。</p>';
+            }
+        }
+
+        function zle_renderDetail(zle_p) {
+            var zle_gallery = "";
+            if (zle_p.images && zle_p.images.length) {
+                zle_gallery = '<div class="zle_gallery">';
+                for (var zle_i = 0; zle_i < zle_p.images.length && zle_i < 4; zle_i++) {
+                    zle_gallery += '<img src="' + zle_escapeHtml(zle_p.images[zle_i]) + '" alt="商品图 ' + (zle_i + 1) + '" loading="lazy">';
+                }
+                zle_gallery += "</div>";
+            }
+
+            zle_detail.innerHTML =
+                '<img class="zle_detail_img" src="' + zle_escapeHtml(zle_p.thumbnail) + '" alt="' + zle_escapeHtml(zle_p.title) + '">' +
+                "<div>" +
+                    '<h1 class="zle_detail_title">' + zle_escapeHtml(zle_p.title) + "</h1>" +
+                    '<p class="zle_detail_price">$' + zle_p.price + "</p>" +
+                    '<ul class="zle_props">' +
+                        "<li><span class='zle_prop_label'>品牌</span>" + zle_escapeHtml(zle_p.brand || "—") + "</li>" +
+                        "<li><span class='zle_prop_label'>分类</span>" + zle_escapeHtml(zle_p.category || "—") + "</li>" +
+                        "<li><span class='zle_prop_label'>评分</span>" + zle_p.rating + " / 5</li>" +
+                        "<li><span class='zle_prop_label'>库存</span>" + zle_p.stock + "</li>" +
+                        "<li><span class='zle_prop_label'>描述</span>" + zle_escapeHtml(zle_p.description || "暂无描述") + "</li>" +
+                    "</ul>" +
+                    zle_gallery +
+                "</div>";
+        }
+
+        zle_loadDetail();
+    </script>
+</body>
+</html>

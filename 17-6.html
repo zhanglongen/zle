@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-02 14:03 | 使用大模型：GLM-5.3-Flash | 功能名称：Promise + async 包饺子流程演示 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>包饺子流程 · Promise 与 async 演示 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_danger: #dc2626;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+            --zle_code_font: Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(58rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .zle_btn {
+            padding: 0.5rem 1.4rem;
+            font-size: 0.95rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .zle_btn.zle_btn_ghost {
+            color: var(--zle_ink);
+            background: #e6ecf5;
+        }
+
+        .zle_btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #zle_clock {
+            margin-left: auto;
+            font-family: var(--zle_code_font);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--zle_accent);
+        }
+
+        .zle_flow {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .zle_step {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.8rem 1rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.7rem;
+            box-shadow: var(--zle_shadow);
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .zle_step_no {
+            flex: none;
+            width: 1.7rem;
+            height: 1.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            background: #94a3b8;
+            border-radius: 50%;
+        }
+
+        .zle_step_main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .zle_step_name {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .zle_step_desc {
+            font-size: 0.8rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_step_state {
+            flex: none;
+            width: 8.5rem;
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_step_bar {
+            flex: none;
+            display: block;
+            width: 30%;
+            min-width: 6rem;
+            height: 0.4rem;
+            background: #e6ecf5;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .zle_step_bar_inner {
+            display: block;
+            width: 0;
+            height: 100%;
+            background: #94a3b8;
+            border-radius: 999px;
+            transition-property: width;
+            transition-timing-function: linear;
+        }
+
+        .zle_step.zle_wait { opacity: 0.65; }
+        .zle_step.zle_run { border-color: var(--zle_accent); }
+        .zle_step.zle_run .zle_step_no { background: var(--zle_accent); }
+        .zle_step.zle_run .zle_step_bar_inner { background: var(--zle_accent); }
+        .zle_step.zle_run .zle_step_state { color: var(--zle_accent); font-weight: 700; }
+        .zle_step.zle_done { border-color: rgb(10 125 77 / 40%); background: #f2fbf7; }
+        .zle_step.zle_done .zle_step_no { background: var(--zle_ok); }
+        .zle_step.zle_done .zle_step_bar_inner { width: 100% !important; background: var(--zle_ok); }
+        .zle_step.zle_done .zle_step_state { color: var(--zle_ok); font-weight: 700; }
+
+        .zle_arrow {
+            align-self: center;
+            color: #94a3b8;
+            font-size: 1rem;
+            line-height: 1.4;
+            padding: 0.1rem 0;
+        }
+
+        .zle_parallel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            position: relative;
+            padding: 0.5rem 0.6rem;
+            border: 1px dashed rgb(47 111 237 / 45%);
+            border-radius: 0.8rem;
+            background: rgb(47 111 237 / 4%);
+        }
+
+        .zle_parallel_tag {
+            position: absolute;
+            top: -0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0 0.7rem;
+            font-family: var(--zle_code_font);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--zle_accent);
+            background: var(--zle_bg);
+        }
+
+        .zle_parallel .zle_step {
+            box-shadow: none;
+        }
+
+        .zle_split_label {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_panels {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+        }
+
+        .zle_panel {
+            padding: clamp(1rem, 3vw, 1.4rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel h2 {
+            margin: 0 0 0.7rem;
+            font-size: 1.1rem;
+        }
+
+        .zle_log {
+            margin: 0;
+            padding: 0.6rem 0.8rem;
+            min-height: 9rem;
+            max-height: 15rem;
+            overflow-y: auto;
+            font-family: var(--zle_code_font);
+            font-size: 0.8rem;
+            color: var(--zle_muted);
+            background: #f8fafc;
+            border: 1px solid var(--zle_line);
+            border-radius: 0.55rem;
+            list-style: none;
+        }
+
+        .zle_log li {
+            padding: 0.12rem 0;
+            border-bottom: 1px dashed var(--zle_line);
+        }
+
+        .zle_log li:last-child {
+            border-bottom: none;
+        }
+
+        .zle_log b {
+            color: var(--zle_accent);
+        }
+
+        .zle_log li.zle_log_ok {
+            color: var(--zle_ok);
+        }
+
+        .zle_log li.zle_log_end {
+            color: #fff;
+            background: var(--zle_ok);
+            text-align: center;
+            border-radius: 0.4rem;
+            border-bottom: none;
+        }
+
+        .zle_code {
+            margin: 0;
+            padding: 0.9rem;
+            font-family: var(--zle_code_font);
+            font-size: 0.8rem;
+            white-space: pre;
+            overflow-x: auto;
+            color: #d7e3f4;
+            background: #0f172a;
+            border-radius: 0.6rem;
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (max-width: 40rem) {
+            .zle_parallel {
+                grid-template-columns: 1fr;
+            }
+
+            .zle_step_state {
+                width: 6.5rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .zle_step,
+            .zle_step_bar_inner {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>包饺子流程 · Promise 与 async 演示</h1>
+            <p>用 <code>setTimeout</code> 模拟每道工序的耗时：买原料 6s → 取原料 2s → <b>和面 4s 与 和馅 3s 并行（Promise.all）</b> → 包饺子 3s → 吃饺子 2s。串行等待用 <code>await</code>，并行合并用 <code>Promise.all</code>。</p>
+        </header>
+
+        <div class="zle_toolbar">
+            <button id="zle_run" class="zle_btn" type="button">开始包饺子</button>
+            <button id="zle_reset" class="zle_btn zle_btn_ghost" type="button">重置流程</button>
+            <span id="zle_clock">0.0s</span>
+        </div>
+
+        <main>
+            <div id="zle_flow" class="zle_flow" aria-label="包饺子流程图"></div>
+
+            <div class="zle_panels">
+                <section class="zle_panel" aria-label="流程日志">
+                    <h2>执行日志（观察时间戳：和面与和馅几乎同时结束）</h2>
+                    <ul id="zle_log" class="zle_log"></ul>
+                </section>
+                <section class="zle_panel" aria-label="核心代码">
+                    <h2>核心代码</h2>
+                    <pre class="zle_code" id="zle_code"></pre>
+                </section>
+            </div>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        /* 流程定义：parallel 为 true 的两步用 Promise.all 同时启动 */
+        var zle_steps = [
+            { zle_key: "buy",   zle_no: 1, zle_name: "买原料", zle_desc: "面粉、韭菜、肉馅、饺子皮……", zle_seconds: 6 },
+            { zle_key: "take",  zle_no: 2, zle_name: "取原料", zle_desc: "把材料从购物袋里取出摆好", zle_seconds: 2 },
+            { zle_key: "dough", zle_no: 3, zle_name: "和面",   zle_desc: "面粉加水揉成面团（并行）", zle_seconds: 4, zle_parallel: true },
+            { zle_key: "fill",  zle_no: 4, zle_name: "和馅",   zle_desc: "韭菜肉馅调味拌匀（并行）", zle_seconds: 3, zle_parallel: true },
+            { zle_key: "wrap",  zle_no: 5, zle_name: "包饺子", zle_desc: "擀皮、放馅、捏褶，一只只成型", zle_seconds: 3 },
+            { zle_key: "eat",   zle_no: 6, zle_name: "吃饺子", zle_desc: "下锅煮好，蘸醋开吃！", zle_seconds: 2 }
+        ];
+
+        var zle_running = false;
+        var zle_startTime = 0;
+        var zle_clockTimer = null;
+
+        function zle_clockStop() {
+            if (zle_clockTimer !== null) {
+                clearInterval(zle_clockTimer);
+                zle_clockTimer = null;
+            }
+        }
+
+        function zle_clockStart() {
+            zle_clockStop();
+            zle_clockTimer = setInterval(function () {
+                document.getElementById("zle_clock").textContent = zle_now().toFixed(1) + "s";
+            }, 100);
+        }
+
+        function zle_now() {
+            return (performance.now() - zle_startTime) / 1000;
+        }
+
+        function zle_setState(zle_key, zle_state, zle_text) {
+            var zle_el = document.getElementById("zle_step_" + zle_key);
+            zle_el.classList.remove("zle_wait", "zle_run", "zle_done");
+            zle_el.classList.add(zle_state);
+            if (zle_text !== undefined) {
+                zle_el.querySelector(".zle_step_state").textContent = zle_text;
+            }
+        }
+
+        function zle_barRun(zle_key, zle_seconds) {
+            var zle_bar = document.getElementById("zle_bar_" + zle_key);
+            zle_bar.style.transitionDuration = "0s";
+            zle_bar.style.width = "0";
+            void zle_bar.offsetWidth;
+            zle_bar.style.transitionDuration = zle_seconds + "s";
+            zle_bar.style.width = "100%";
+        }
+
+        function zle_logTo(zle_html, zle_class) {
+            var zle_list = document.getElementById("zle_log");
+            var zle_li = document.createElement("li");
+            if (zle_class) { zle_li.className = zle_class; }
+            zle_li.innerHTML = "<b>[" + zle_now().toFixed(1) + "s]</b> " + zle_html;
+            zle_list.appendChild(zle_li);
+            zle_list.scrollTop = zle_list.scrollHeight;
+        }
+
+        /* 用 setTimeout 模拟一道耗时工序，返回 Promise */
+        function zle_simulate(zle_key, zle_seconds) {
+            zle_barRun(zle_key, zle_seconds);
+            return new Promise(function (zle_resolve) {
+                setTimeout(function () {
+                    zle_setState(zle_key, "zle_done", "✔ 已完成 · " + zle_seconds + "s");
+                    zle_resolve(zle_key);
+                }, zle_seconds * 1000);
+            });
+        }
+
+        async function zle_makeDumplings() {
+            var zle_map = {};
+            for (var zle_i = 0; zle_i < zle_steps.length; zle_i++) {
+                zle_map[zle_steps[zle_i].zle_key] = zle_steps[zle_i];
+            }
+
+            zle_logTo("🥟 开始包饺子！买原料预计 " + zle_map.buy.zle_seconds + "s……");
+
+            /* 1. 买原料（串行 await） */
+            zle_setState("buy", "zle_run", "进行中…");
+            zle_logTo("await 买原料（6s）");
+            await zle_simulate("buy", zle_map.buy.zle_seconds);
+
+            /* 2. 取原料（串行 await） */
+            zle_setState("take", "zle_run", "进行中…");
+            zle_logTo("await 取原料（2s）");
+            await zle_simulate("take", zle_map.take.zle_seconds);
+
+            /* 3. 和面 + 和馅 同时进行（Promise.all） */
+            zle_setState("dough", "zle_run", "进行中…");
+            zle_setState("fill", "zle_run", "进行中…");
+            zle_logTo("Promise.all 同时启动 和面(4s) 与 和馅(3s)");
+            var zle_results = await Promise.all([
+                zle_simulate("dough", zle_map.dough.zle_seconds),
+                zle_simulate("fill", zle_map.fill.zle_seconds)
+            ]);
+            zle_logTo("两项都完成，Promise.all 返回：" + zle_results.join("、"));
+
+            /* 4. 包饺子 */
+            zle_setState("wrap", "zle_run", "进行中…");
+            zle_logTo("await 包饺子（3s）");
+            await zle_simulate("wrap", zle_map.wrap.zle_seconds);
+
+            /* 5. 吃饺子 */
+            zle_setState("eat", "zle_run", "进行中…");
+            zle_logTo("await 吃饺子（2s）");
+            await zle_simulate("eat", zle_map.eat.zle_seconds);
+
+            zle_logTo("🎉 全部工序完成，总耗时约 17s（6+2+max(4,3)+3+2）", "zle_log_end");
+            zle_running = false;
+            zle_clockStop();
+            document.getElementById("zle_clock").textContent = zle_now().toFixed(1) + "s";
+            document.getElementById("zle_run").disabled = false;
+        }
+
+        function zle_resetFlow() {
+            for (var zle_i = 0; zle_i < zle_steps.length; zle_i++) {
+                var zle_s = zle_steps[zle_i];
+                zle_setState(zle_s.zle_key, "zle_wait", "等待中");
+                document.getElementById("zle_bar_" + zle_s.zle_key).style.transitionDuration = "0s";
+                document.getElementById("zle_bar_" + zle_s.zle_key).style.width = "0";
+            }
+            document.getElementById("zle_log").innerHTML = "";
+            zle_clockStop();
+            document.getElementById("zle_clock").textContent = "0.0s";
+            zle_startTime = performance.now();
+        }
+
+        document.getElementById("zle_run").addEventListener("click", function () {
+            if (zle_running) { return; }
+            zle_running = true;
+            this.disabled = true;
+            zle_resetFlow();
+            zle_clockStart();
+            zle_makeDumplings();
+        });
+
+        document.getElementById("zle_reset").addEventListener("click", zle_resetFlow);
+
+        /* 步骤卡片渲染：相邻的并行步骤归入同一组，放进 Promise.all 并行区容器 */
+        (function zle_init() {
+            function zle_card(zle_s) {
+                return '<div class="zle_step zle_wait" id="zle_step_' + zle_s.zle_key + '">' +
+                    '<span class="zle_step_no">' + zle_s.zle_no + "</span>" +
+                    '<span class="zle_step_main">' +
+                        '<div class="zle_step_name">' + zle_s.zle_name + "</div>" +
+                        '<div class="zle_step_desc">' + zle_s.zle_desc + "</div>" +
+                    "</span>" +
+                    '<span class="zle_step_bar"><span id="zle_bar_' + zle_s.zle_key + '" class="zle_step_bar_inner"></span></span>' +
+                    '<span class="zle_step_state">等待中</span>' +
+                "</div>";
+            }
+
+            /* 分组：并行标志相同的相邻步骤为一组 */
+            var zle_groups = [];
+            var zle_cur = null;
+            for (var zle_i = 0; zle_i < zle_steps.length; zle_i++) {
+                var zle_par = zle_steps[zle_i].zle_parallel === true;
+                if (zle_cur === null || zle_cur.par !== zle_par) {
+                    zle_cur = { par: zle_par, steps: [] };
+                    zle_groups.push(zle_cur);
+                }
+                zle_cur.steps.push(zle_steps[zle_i]);
+            }
+
+            var zle_arrow = '<div class="zle_arrow" aria-hidden="true">▼</div>';
+            var zle_html = "";
+            for (var zle_g = 0; zle_g < zle_groups.length; zle_g++) {
+                if (zle_g > 0) { zle_html += zle_arrow; }
+                if (zle_groups[zle_g].par) {
+                    zle_html += '<div class="zle_parallel"><span class="zle_parallel_tag">Promise.all 并行区</span>';
+                }
+                for (var zle_j = 0; zle_j < zle_groups[zle_g].steps.length; zle_j++) {
+                    zle_html += zle_card(zle_groups[zle_g].steps[zle_j]);
+                }
+                if (zle_groups[zle_g].par) {
+                    zle_html += "</div>";
+                }
+            }
+            document.getElementById("zle_flow").innerHTML = zle_html;
+        })();
+
+        document.getElementById("zle_code").textContent =
+            'function zle_simulate(key, seconds) {\n' +
+            '  return new Promise(resolve => {\n' +
+            '    setTimeout(() => resolve(key), seconds * 1000);\n' +
+            '  });\n' +
+            '}\n\n' +
+            'async function zle_makeDumplings() {\n' +
+            '  await zle_simulate("buy", 6);            // 买原料 6s\n' +
+            '  await zle_simulate("take", 2);           // 取原料 2s\n' +
+            '  await Promise.all([                      // 和面、和馅并行\n' +
+            '    zle_simulate("dough", 4),\n' +
+            '    zle_simulate("fill", 3)\n' +
+            '  ]);\n' +
+            '  await zle_simulate("wrap", 3);           // 包饺子 3s\n' +
+            '  await zle_simulate("eat", 2);            // 吃饺子 2s\n' +
+            '}';
+    </script>
+</body>
+</html>
