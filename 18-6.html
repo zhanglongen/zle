@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 14:20 | 使用大模型：GLM-5.3-Flash | 功能名称：Mermaid 智能客服系统流程图与 ER 图 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid 智能客服系统：流程图与 ER 图 | 张珑恩</title>
+    <script src="cdn/mermaid.min.js"></script>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(60rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_panel {
+            margin-bottom: 1.5rem;
+            padding: clamp(0.8rem, 2vw, 1.2rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel h2 {
+            margin: 0 0 0.4rem;
+            font-size: 1.05rem;
+        }
+
+        .zle_panel > p {
+            margin: 0 0 0.6rem;
+            font-size: 0.82rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_diagram {
+            overflow-x: auto;
+        }
+
+        .zle_diagram pre.mermaid {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background: #fbfdff;
+            border-radius: 0.6rem;
+            padding: 0.6rem;
+        }
+
+        .zle_note {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_note code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>智能客服系统：Mermaid 流程图 + ER 图</h1>
+            <p>Mermaid 库文件已下载到本地 <code>cdn/mermaid.min.js</code>（v10.9.1），以相对路径引入，离线渲染。图表源码直接写在 HTML 的 <code>&lt;pre class="mermaid"&gt;</code> 标签中。</p>
+        </header>
+
+        <section class="zle_panel" aria-label="智能客服流程图">
+            <h2>① 智能客服问答流程图（Flowchart）</h2>
+            <p>用户提问经意图识别分流：常见问题走知识库 RAG 检索作答，复杂问题转人工坐席。</p>
+            <div class="zle_diagram">
+                <pre class="mermaid">
+flowchart TD
+    A[用户发起提问] --> B[接入层 API 网关]
+    B --> C{意图识别 NLU}
+    C -->|常见问题| D[知识库检索 RAG]
+    C -->|复杂 / 投诉| H[转人工坐席]
+    C -->|办理业务| I[调用业务接口]
+    D --> E[LLM 生成答案]
+    E --> F{置信度足够?}
+    F -->|是| G[返回答案]
+    F -->|否| H
+    I --> G
+    H --> J[人工解答]
+    J --> G
+    G --> K[满意度评价]
+    K -->|满意| L[写入知识库沉淀]
+    K -->|不满意| M[标记待优化问答对]
+    L --> N([会话结束])
+    M --> N
+                </pre>
+            </div>
+        </section>
+
+        <section class="zle_panel" aria-label="智能客服 ER 图">
+            <h2>② 智能客服数据库 ER 图（Entity Relationship）</h2>
+            <p>五张核心表：用户、会话、消息、知识条目、工单，及其主外键关系。</p>
+            <div class="zle_diagram">
+                <pre class="mermaid">
+erDiagram
+    USER ||--o{ SESSION : "发起"
+    SESSION ||--o{ MESSAGE : "包含"
+    SESSION ||--o{ TICKET : "可转人工生成"
+    USER ||--o{ TICKET : "所属"
+    KB_ENTRY ||..o{ MESSAGE : "被检索引用"
+
+    USER {
+        bigint user_id PK "用户ID"
+        varchar nickname "昵称"
+        varchar channel "来源渠道"
+        datetime created_at "注册时间"
+    }
+    SESSION {
+        bigint session_id PK "会话ID"
+        bigint user_id FK "所属用户"
+        varchar status "进行中或已结束"
+        datetime started_at "开始时间"
+        int satisfaction "满意度评分"
+    }
+    MESSAGE {
+        bigint msg_id PK "消息ID"
+        bigint session_id FK "所属会话"
+        varchar role "user或bot或agent"
+        text content "消息内容"
+        bigint kb_id FK "引用的知识条目"
+        datetime sent_at "发送时间"
+    }
+    KB_ENTRY {
+        bigint kb_id PK "知识条目ID"
+        varchar title "问题标题"
+        text content "标准答案"
+        vector embedding "语义向量"
+        datetime updated_at "更新时间"
+    }
+    TICKET {
+        bigint ticket_id PK "工单ID"
+        bigint session_id FK "来源会话"
+        bigint user_id FK "所属用户"
+        bigint agent_id "坐席ID"
+        varchar status "处理状态"
+    }
+                </pre>
+            </div>
+        </section>
+
+        <div class="zle_note">
+            说明：使用 <code>mermaid.initialize({ startOnLoad: true })</code> 自动渲染页面内所有 <code>pre.mermaid</code> 源码块；
+            流程图用 <code>flowchart TD</code> 语法，ER 图用 <code>erDiagram</code> 语法（PK/FK 标注主外键）。
+            与 ECharts 不同，Mermaid 是"文本即图形"——改源码即可改图，适合文档驱动开发。
+        </div>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · Mermaid（本地 cdn 目录）
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: "base",
+            securityLevel: "strict",
+            themeVariables: {
+                primaryColor: "#eaf2ff",
+                primaryTextColor: "#1f2d3d",
+                primaryBorderColor: "#2f6fed",
+                lineColor: "#7d93ad",
+                fontSize: "14px"
+            },
+            flowchart: { curve: "basis", useMaxWidth: true },
+            er: { useMaxWidth: true }
+        });
+    </script>
+</body>
+</html>

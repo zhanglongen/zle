@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 13:46 | 使用大模型：GLM-5.3-Flash | 功能名称：知识库智能客服系统架构图（SVG）与科研方向 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库智能客服系统架构图（SVG） | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_ok: #0a7d4d;
+            --zle_research: #8b4fd6;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(64rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_stage {
+            padding: 0.6rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        #zle_svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 0.7rem;
+            background: #fbfdff;
+        }
+
+        .zle_node {
+            cursor: pointer;
+        }
+
+        .zle_node .zle_hit {
+            fill: transparent;
+        }
+
+        .zle_node:hover .zle_box {
+            stroke-width: 3;
+            filter: url(#zle_glow);
+        }
+
+        #zle_tip {
+            min-height: 4.6rem;
+            margin-top: 0.6rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.88rem;
+            color: var(--zle_muted);
+            background: #f5f9ff;
+            border: 1px solid rgb(47 111 237 / 25%);
+            border-radius: 0.55rem;
+        }
+
+        #zle_tip b {
+            color: var(--zle_accent);
+        }
+
+        .zle_research_sec {
+            margin-top: 1.2rem;
+            padding: 1.2rem 1.4rem;
+            background: var(--zle_surface);
+            border: 1px dashed rgb(139 79 214 / 50%);
+            border-left: 0.25rem solid var(--zle_research);
+            border-radius: 0.7rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_research_sec h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1.1rem;
+            color: var(--zle_research);
+        }
+
+        .zle_research_sec ol {
+            margin: 0;
+            padding-left: 1.4rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_research_sec li {
+            margin-bottom: 0.3rem;
+        }
+
+        .zle_research_sec b {
+            color: var(--zle_ink);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>基于知识库的智能客服系统架构图（SVG）</h1>
+            <p>用户请求经接入层进入智能服务层，RAG 检索增强生成负责“查知识库 + 组织答案”；右侧虚线区标注本系统的四个科研方向。悬停任意模块可查看职责说明。</p>
+        </header>
+
+        <div class="zle_stage">
+            <svg id="zle_svg" viewBox="0 0 980 640" xmlns="http://www.w3.org/2000/svg" role="img"
+                aria-label="知识库智能客服系统架构图：用户层、接入层、智能服务层、知识层与科研方向">
+                <defs>
+                    <marker id="zle_arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L8,4.5 L0,9 Z" fill="#7d93ad"/>
+                    </marker>
+                    <marker id="zle_arrow_rev" markerWidth="9" markerHeight="9" refX="1" refY="4.5" orient="auto">
+                        <path d="M8,0 L0,4.5 L8,9 Z" fill="#b7c4d4"/>
+                    </marker>
+                    <filter id="zle_glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#2f6fed" flood-opacity="0.45"/>
+                    </filter>
+                    <linearGradient id="zle_top_grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#ffffff"/>
+                        <stop offset="1" stop-color="#eaf2ff"/>
+                    </linearGradient>
+                </defs>
+
+                <text x="490" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2d3d">知识库智能客服系统架构</text>
+
+                <!-- 用户层 -->
+                <g class="zle_node" id="zle_n_user">
+                    <rect class="zle_box" x="290" y="52" width="400" height="58" rx="10" fill="url(#zle_top_grad)" stroke="#2f6fed" stroke-width="2"/>
+                    <text x="490" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#2f6fed">用户层</text>
+                    <text x="490" y="97" text-anchor="middle" font-size="12" fill="#5b6b7c">网页端 · 微信公众号 · App · 电话语音</text>
+                    <rect class="zle_hit" x="290" y="52" width="400" height="58"/>
+                </g>
+
+                <path d="M490,110 L490,140" stroke="#7d93ad" stroke-width="2" marker-end="url(#zle_arrow)"/>
+
+                <!-- 接入层 -->
+                <g class="zle_node" id="zle_n_gate">
+                    <rect class="zle_box" x="290" y="142" width="400" height="58" rx="10" fill="#f5f9ff" stroke="#2f6fed" stroke-width="1.5"/>
+                    <text x="490" y="166" text-anchor="middle" font-size="15" font-weight="700" fill="#2f6fed">接入层</text>
+                    <text x="490" y="187" text-anchor="middle" font-size="12" fill="#5b6b7c">API 网关 · 身份认证 · 负载均衡 · 会话保持</text>
+                    <rect class="zle_hit" x="290" y="142" width="400" height="58"/>
+                </g>
+
+                <path d="M490,200 L490,230" stroke="#7d93ad" stroke-width="2" marker-end="url(#zle_arrow)"/>
+
+                <!-- 智能服务层 -->
+                <g class="zle_node" id="zle_n_core">
+                    <rect class="zle_box" x="150" y="232" width="680" height="150" rx="12" fill="#f2fbf7" stroke="#0a7d4d" stroke-width="1.5" stroke-dasharray="none"/>
+                    <text x="490" y="256" text-anchor="middle" font-size="15" font-weight="700" fill="#0a7d4d">智能服务层（对话引擎）</text>
+                    <rect class="zle_box" x="178" y="274" width="140" height="88" rx="8" fill="#ffffff" stroke="#0a7d4d"/>
+                    <text x="248" y="308" text-anchor="middle" font-size="13" fill="#2b3d52">意图识别</text>
+                    <text x="248" y="328" text-anchor="middle" font-size="11" fill="#8496ab">NLU · 分词</text>
+                    <rect class="zle_box" x="338" y="274" width="140" height="88" rx="8" fill="#ffffff" stroke="#0a7d4d"/>
+                    <text x="408" y="308" text-anchor="middle" font-size="13" fill="#2b3d52">对话管理</text>
+                    <text x="408" y="328" text-anchor="middle" font-size="11" fill="#8496ab">多轮状态 · 澄清</text>
+                    <rect class="zle_box" x="498" y="274" width="140" height="88" rx="8" fill="#fff8e8" stroke="#d97706" stroke-width="2"/>
+                    <text x="568" y="303" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309">RAG 检索增强</text>
+                    <text x="568" y="323" text-anchor="middle" font-size="11" fill="#8496ab">向量检索</text>
+                    <text x="568" y="340" text-anchor="middle" font-size="11" fill="#8496ab">重排序</text>
+                    <rect class="zle_box" x="658" y="274" width="140" height="88" rx="8" fill="#ffffff" stroke="#0a7d4d"/>
+                    <text x="728" y="308" text-anchor="middle" font-size="13" fill="#2b3d52">答案生成</text>
+                    <text x="728" y="328" text-anchor="middle" font-size="11" fill="#8496ab">LLM · 模板兜底</text>
+                    <path d="M318,318 L338,318 M478,318 L498,318 M638,318 L658,318" stroke="#7d93ad" stroke-width="2" marker-end="url(#zle_arrow)"/>
+                    <rect class="zle_hit" x="150" y="232" width="680" height="150"/>
+                </g>
+
+                <!-- 双向箭头：智能服务层 <-> 知识层 -->
+                <path d="M410,382 L410,432" stroke="#7d93ad" stroke-width="2" marker-end="url(#zle_arrow)"/>
+                <path d="M570,432 L570,382" stroke="#b7c4d4" stroke-width="2" marker-end="url(#zle_arrow_rev)"/>
+                <text x="432" y="412" font-size="12" fill="#5b6b7c">检索请求</text>
+                <text x="585" y="412" font-size="12" fill="#8496ab">知识片段</text>
+
+                <!-- 知识层 -->
+                <g class="zle_node" id="zle_n_kb">
+                    <rect class="zle_box" x="150" y="434" width="680" height="120" rx="12" fill="#fdf5ff" stroke="#8b4fd6" stroke-width="1.5"/>
+                    <text x="490" y="458" text-anchor="middle" font-size="15" font-weight="700" fill="#8b4fd6">知识层</text>
+                    <rect class="zle_box" x="178" y="474" width="150" height="62" rx="8" fill="#ffffff" stroke="#8b4fd6"/>
+                    <text x="253" y="499" text-anchor="middle" font-size="13" fill="#2b3d52">FAQ 知识库</text>
+                    <text x="253" y="519" text-anchor="middle" font-size="11" fill="#8496ab">问答对 · 文档</text>
+                    <rect class="zle_box" x="348" y="474" width="150" height="62" rx="8" fill="#ffffff" stroke="#8b4fd6"/>
+                    <text x="423" y="499" text-anchor="middle" font-size="13" fill="#2b3d52">向量数据库</text>
+                    <text x="423" y="519" text-anchor="middle" font-size="11" fill="#8496ab">Embedding 索引</text>
+                    <rect class="zle_box" x="518" y="474" width="150" height="62" rx="8" fill="#ffffff" stroke="#8b4fd6"/>
+                    <text x="593" y="499" text-anchor="middle" font-size="13" fill="#2b3d52">知识图谱</text>
+                    <text x="593" y="519" text-anchor="middle" font-size="11" fill="#8496ab">实体 · 关系</text>
+                    <rect class="zle_box" x="688" y="474" width="120" height="62" rx="8" fill="#ffffff" stroke="#8b4fd6"/>
+                    <text x="748" y="499" text-anchor="middle" font-size="13" fill="#2b3d52">业务数据库</text>
+                    <text x="748" y="519" text-anchor="middle" font-size="11" fill="#8496ab">订单 · 工单</text>
+                    <rect class="zle_hit" x="150" y="434" width="680" height="120"/>
+                </g>
+
+                <!-- 管理侧栏 -->
+                <g class="zle_node" id="zle_n_admin">
+                    <rect class="zle_box" x="24" y="232" width="100" height="322" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+                    <text x="74" y="270" text-anchor="middle" font-size="13" font-weight="700" fill="#5b6b7c">运营管理</text>
+                    <text x="74" y="330" text-anchor="middle" font-size="11" fill="#8496ab">知识库</text>
+                    <text x="74" y="348" text-anchor="middle" font-size="11" fill="#8496ab">维护录入</text>
+                    <text x="74" y="410" text-anchor="middle" font-size="11" fill="#8496ab">对话日志</text>
+                    <text x="74" y="428" text-anchor="middle" font-size="11" fill="#8496ab">统计分析</text>
+                    <text x="74" y="490" text-anchor="middle" font-size="11" fill="#8496ab">人工坐席</text>
+                    <text x="74" y="508" text-anchor="middle" font-size="11" fill="#8496ab">转接兜底</text>
+                    <rect class="zle_hit" x="24" y="232" width="100" height="322"/>
+                </g>
+                <path d="M124,393 L148,393" stroke="#b7c4d4" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#zle_arrow)"/>
+
+                <!-- 科研方向（虚线区） -->
+                <g class="zle_node" id="zle_n_research">
+                    <rect class="zle_box" x="856" y="142" width="108" height="412" rx="10" fill="#faf6ff" stroke="#8b4fd6" stroke-width="1.5" stroke-dasharray="6 4"/>
+                    <text x="910" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#8b4fd6">科研方向</text>
+                    <circle cx="880" cy="222" r="9" fill="#8b4fd6"/>
+                    <text x="880" y="226" text-anchor="middle" font-size="10" fill="#ffffff">1</text>
+                    <text x="920" y="219" text-anchor="middle" font-size="11" fill="#2b3d52">知识库</text>
+                    <text x="920" y="234" text-anchor="middle" font-size="11" fill="#2b3d52">自动构建</text>
+                    <circle cx="880" cy="308" r="9" fill="#8b4fd6"/>
+                    <text x="880" y="312" text-anchor="middle" font-size="10" fill="#ffffff">2</text>
+                    <text x="920" y="305" text-anchor="middle" font-size="11" fill="#2b3d52">RAG 检索</text>
+                    <text x="920" y="320" text-anchor="middle" font-size="11" fill="#2b3d52">增强生成</text>
+                    <circle cx="880" cy="394" r="9" fill="#8b4fd6"/>
+                    <text x="880" y="398" text-anchor="middle" font-size="10" fill="#ffffff">3</text>
+                    <text x="920" y="391" text-anchor="middle" font-size="11" fill="#2b3d52">多轮对话</text>
+                    <text x="920" y="406" text-anchor="middle" font-size="11" fill="#2b3d52">意图优化</text>
+                    <circle cx="880" cy="480" r="9" fill="#8b4fd6"/>
+                    <text x="880" y="484" text-anchor="middle" font-size="10" fill="#ffffff">4</text>
+                    <text x="920" y="477" text-anchor="middle" font-size="11" fill="#2b3d52">答案质量</text>
+                    <text x="920" y="492" text-anchor="middle" font-size="11" fill="#2b3d52">评测体系</text>
+                    <rect class="zle_hit" x="856" y="142" width="108" height="412"/>
+                </g>
+                <path d="M832,317 L854,317" stroke="#b7c4d4" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#zle_arrow)"/>
+
+                <!-- 底注 -->
+                <text x="490" y="594" text-anchor="middle" font-size="12" fill="#8496ab">实线为调用链路 · 虚线为管理与科研支撑 · 检索增强生成（RAG）先查知识库再组织答案，可显著降低大模型幻觉</text>
+            </svg>
+            <div id="zle_tip">鼠标悬停在架构图任意模块上，这里会显示该模块的职责说明。</div>
+        </div>
+
+        <section class="zle_research_sec">
+            <h2>科研方向详述</h2>
+            <ol>
+                <li><b>知识库自动构建与更新</b>：研究非结构化文档（PDF/工单/聊天记录）的解析、清洗、切分与向量化流水线，让知识库随业务数据自动演进。</li>
+                <li><b>检索增强生成（RAG）优化</b>：研究混合检索（关键词 + 向量）、重排序策略与上下文压缩，在控制成本的同时提升答案相关度、抑制大模型幻觉。</li>
+                <li><b>多轮对话与意图识别</b>：研究基于状态机与大模型结合的对话管理（DST），提升澄清追问、上下文继承与意图漂移场景的准确率。</li>
+                <li><b>答案质量评测体系</b>：构建人工标注 + LLM-as-a-Judge 的混合评测基准，定义准确率、召回率、解决率与响应时延的联合指标。</li>
+            </ol>
+        </section>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript + SVG
+        </footer>
+    </div>
+
+    <script>
+        var zle_descs = {
+            zle_n_user: "<b>用户层</b>：终端用户通过网页、微信公众号、App 或电话语音发起咨询，多渠道统一汇入。",
+            zle_n_gate: "<b>接入层</b>：API 网关完成鉴权、限流与负载均衡，按会话 ID 保持上下文，把请求路由到对话引擎。",
+            zle_n_core: "<b>智能服务层</b>：对话引擎四步流水线——意图识别（NLU）理解用户想问什么；对话管理维护多轮状态；RAG 检索增强从知识库召回证据；答案生成用 LLM 组织成自然语言，检索失败时回退到模板兜底。",
+            zle_n_kb: "<b>知识层</b>：四类知识源——FAQ 问答对与文档、向量数据库（Embedding 索引，支持语义检索）、知识图谱（实体关系推理）、业务数据库（订单、工单等实时数据）。",
+            zle_n_admin: "<b>运营管理</b>：知识库维护录入、对话日志与统计分析、人工坐席转接兜底，形成“机器人 + 人工”闭环。",
+            zle_n_research: "<b>科研方向</b>：本系统的四个研究切入点——知识库自动构建、RAG 检索增强优化、多轮对话意图优化、答案质量评测体系，详见下方详述。"
+        };
+
+        document.querySelectorAll(".zle_node").forEach(function (zle_g) {
+            zle_g.addEventListener("mouseenter", function () {
+                document.getElementById("zle_tip").innerHTML = zle_descs[zle_g.id] || "";
+            });
+            zle_g.addEventListener("mouseleave", function () {
+                document.getElementById("zle_tip").innerHTML = "鼠标悬停在架构图任意模块上，这里会显示该模块的职责说明。";
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 13:34 | 使用大模型：GLM-5.3-Flash | 功能名称：Canvas 电脑系统架构图 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电脑系统架构图（Canvas） | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(58rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_stage {
+            padding: 0.6rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        #zle_canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 0.7rem;
+            background: #fbfdff;
+            cursor: default;
+        }
+
+        #zle_tip {
+            min-height: 4.6rem;
+            margin-top: 0.6rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.88rem;
+            color: var(--zle_muted);
+            background: #f5f9ff;
+            border: 1px solid rgb(47 111 237 / 25%);
+            border-radius: 0.55rem;
+        }
+
+        #zle_tip b {
+            color: var(--zle_accent);
+        }
+
+        .zle_legend {
+            margin-top: 0.6rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            font-size: 0.82rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_dot {
+            display: inline-block;
+            width: 0.7rem;
+            height: 0.7rem;
+            margin-right: 0.3rem;
+            border-radius: 50%;
+            vertical-align: -1px;
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>电脑系统架构图（Canvas 绘制）</h1>
+            <p>自上而下：应用软件 → 操作系统 → 驱动程序 → 硬件。鼠标悬停任意色块可查看该层的职责说明。</p>
+        </header>
+
+        <div class="zle_stage">
+            <canvas id="zle_canvas" width="960" height="680" role="img"
+                aria-label="电脑系统架构图：应用软件层、操作系统层、驱动程序层、硬件层，层间为调用与响应箭头"></canvas>
+            <div id="zle_tip">鼠标悬停在架构图任意色块上，这里会显示该模块的职责说明。</div>
+            <div class="zle_legend">
+                <span><span class="zle_dot" style="background:#2f6fed"></span>应用软件层</span>
+                <span><span class="zle_dot" style="background:#0a7d4d"></span>操作系统层</span>
+                <span><span class="zle_dot" style="background:#8b4fd6"></span>驱动程序层</span>
+                <span><span class="zle_dot" style="background:#d97706"></span>硬件层</span>
+                <span>↓ 调用　↑ 响应</span>
+            </div>
+        </div>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        /* ---------- 架构数据 ---------- */
+        var zle_layers = [
+            {
+                zle_key: "app", zle_name: "应用软件层", zle_color: "#2f6fed", zle_soft: "rgb(47 111 237 / 12%)",
+                zle_desc: "直接面向用户的程序：浏览器、办公套件、开发工具、媒体播放器等。不直接操作硬件，一切能力都通过操作系统提供的系统调用获得。",
+                zle_items: ["浏览器", "办公套件", "开发工具", "媒体播放"]
+            },
+            {
+                zle_key: "os", zle_name: "操作系统层", zle_color: "#0a7d4d", zle_soft: "rgb(10 125 77 / 12%)",
+                zle_desc: "系统核心（如 Windows / Linux 内核）：向上提供系统调用 API，向下调度驱动。负责进程管理、内存管理、文件系统与网络协议栈。",
+                zle_items: ["进程管理", "内存管理", "文件系统", "网络协议栈"]
+            },
+            {
+                zle_key: "drv", zle_name: "驱动程序层", zle_color: "#8b4fd6", zle_soft: "rgb(139 79 214 / 12%)",
+                zle_desc: "硬件厂商提供的“翻译官”：把操作系统的通用指令翻译成特定硬件听得懂的信号，如显卡驱动、硬盘驱动、网卡驱动。",
+                zle_items: ["显卡驱动", "硬盘驱动", "网卡驱动", "声卡驱动"]
+            },
+            {
+                zle_key: "hw", zle_name: "硬件层", zle_color: "#d97706", zle_soft: "rgb(217 119 6 / 12%)",
+                zle_desc: "物理设备：CPU 运算、内存暂存、硬盘长期存储，通过主板总线互联，中断机制让硬件能主动通知 CPU。",
+                zle_items: ["CPU", "内存", "固态硬盘", "显卡", "网卡", "主板总线"]
+            }
+        ];
+        var zle_gapLabels = ["系统调用 API", "驱动接口", "端口与寄存器"];
+
+        /* ---------- 画布尺寸 ---------- */
+        var zle_canvas = document.getElementById("zle_canvas");
+        var zle_ctx = zle_canvas.getContext("2d");
+        var zle_ratio = Math.min(window.devicePixelRatio || 1, 2);
+        var zle_cw = 960, zle_ch = 680;   /* 逻辑坐标 */
+        zle_canvas.width = zle_cw * zle_ratio;
+        zle_canvas.height = zle_ch * zle_ratio;
+        zle_ctx.scale(zle_ratio, zle_ratio);
+
+        var zle_geom = [];   /* 可命中区域：layer 层框 + item 芯片 */
+        var zle_hover = null;
+
+        function zle_roundRect(zle_x, zle_y, zle_w, zle_h, zle_r) {
+            zle_ctx.beginPath();
+            zle_ctx.moveTo(zle_x + zle_r, zle_y);
+            zle_ctx.arcTo(zle_x + zle_w, zle_y, zle_x + zle_w, zle_y + zle_h, zle_r);
+            zle_ctx.arcTo(zle_x + zle_w, zle_y + zle_h, zle_x, zle_y + zle_h, zle_r);
+            zle_ctx.arcTo(zle_x, zle_y + zle_h, zle_x, zle_y, zle_r);
+            zle_ctx.arcTo(zle_x, zle_y, zle_x + zle_w, zle_y, zle_r);
+            zle_ctx.closePath();
+        }
+
+        function zle_arrow(zle_x1, zle_y1, zle_x2, zle_y2, zle_color) {
+            var zle_head = 7;
+            var zle_ang = Math.atan2(zle_y2 - zle_y1, zle_x2 - zle_x1);
+            zle_ctx.strokeStyle = zle_color;
+            zle_ctx.fillStyle = zle_color;
+            zle_ctx.lineWidth = 2;
+            zle_ctx.beginPath();
+            zle_ctx.moveTo(zle_x1, zle_y1);
+            zle_ctx.lineTo(zle_x2, zle_y2);
+            zle_ctx.stroke();
+            zle_ctx.beginPath();
+            zle_ctx.moveTo(zle_x2, zle_y2);
+            zle_ctx.lineTo(zle_x2 - zle_head * Math.cos(zle_ang - 0.45), zle_y2 - zle_head * Math.sin(zle_ang - 0.45));
+            zle_ctx.lineTo(zle_x2 - zle_head * Math.cos(zle_ang + 0.45), zle_y2 - zle_head * Math.sin(zle_ang + 0.45));
+            zle_ctx.closePath();
+            zle_ctx.fill();
+        }
+
+        function zle_draw() {
+            zle_ctx.clearRect(0, 0, zle_cw, zle_ch);
+
+            /* 标题 */
+            zle_ctx.textAlign = "center";
+            zle_ctx.textBaseline = "middle";
+            zle_ctx.font = "700 24px 'Microsoft YaHei', sans-serif";
+            zle_ctx.fillStyle = "#1f2d3d";
+            zle_ctx.fillText("计 算 机 系 统 架 构", zle_cw / 2, 34);
+
+            var zle_marginX = 90, zle_layerH = 104, zle_gap = 52, zle_top = 68;
+            zle_geom = [];
+
+            for (var zle_i = 0; zle_i < zle_layers.length; zle_i++) {
+                var zle_lay = zle_layers[zle_i];
+                var zle_y = zle_top + zle_i * (zle_layerH + zle_gap);
+                var zle_isHot = zle_hover !== null && zle_hover.zle_type === "layer" && zle_hover.zle_index === zle_i;
+
+                /* 层框 */
+                zle_ctx.shadowColor = zle_isHot ? zle_lay.zle_color : "rgba(31,45,61,0.10)";
+                zle_ctx.shadowBlur = zle_isHot ? 16 : 8;
+                zle_ctx.shadowOffsetY = zle_isHot ? 4 : 2;
+                var zle_grad = zle_ctx.createLinearGradient(0, zle_y, 0, zle_y + zle_layerH);
+                zle_grad.addColorStop(0, "#ffffff");
+                zle_grad.addColorStop(1, zle_lay.zle_soft);
+                zle_roundRect(zle_marginX, zle_y, zle_cw - zle_marginX * 2, zle_layerH, 12);
+                zle_ctx.fillStyle = zle_grad;
+                zle_ctx.fill();
+                zle_ctx.shadowColor = "rgba(0,0,0,0)";
+                zle_ctx.shadowBlur = 0;
+                zle_ctx.shadowOffsetY = 0;
+                zle_ctx.lineWidth = zle_isHot ? 3 : 1.5;
+                zle_ctx.strokeStyle = zle_isHot ? zle_lay.zle_color : "rgba(31,45,61,0.15)";
+                zle_ctx.stroke();
+
+                /* 层名（左侧竖排区） */
+                zle_ctx.fillStyle = zle_lay.zle_color;
+                zle_ctx.font = "700 17px 'Microsoft YaHei', sans-serif";
+                zle_ctx.textAlign = "left";
+                zle_ctx.fillText(zle_lay.zle_name, zle_marginX + 18, zle_y + 24);
+                zle_ctx.strokeStyle = zle_lay.zle_color;
+                zle_ctx.lineWidth = 2;
+                zle_ctx.beginPath();
+                zle_ctx.moveTo(zle_marginX + 18, zle_y + 38);
+                zle_ctx.lineTo(zle_marginX + 128, zle_y + 38);
+                zle_ctx.stroke();
+                zle_geom.push({ zle_type: "layer", zle_index: zle_i, zle_x: zle_marginX, zle_y: zle_y, zle_w: zle_cw - zle_marginX * 2, zle_h: zle_layerH });
+
+                /* 组件芯片（自动换行） */
+                var zle_chipH = 26, zle_chipGap = 10, zle_perRow = 4;
+                var zle_areaX = zle_marginX + 18, zle_areaW = zle_cw - zle_marginX * 2 - 36;
+                var zle_chipW = (zle_areaW - zle_chipGap * (zle_perRow - 1)) / zle_perRow;
+                for (var zle_j = 0; zle_j < zle_lay.zle_items.length; zle_j++) {
+                    var zle_col = zle_j % zle_perRow, zle_row = Math.floor(zle_j / zle_perRow);
+                    var zle_cx = zle_areaX + zle_col * (zle_chipW + zle_chipGap);
+                    var zle_cy = zle_y + 50 + zle_row * (zle_chipH + 8);
+                    zle_roundRect(zle_cx, zle_cy, zle_chipW, zle_chipH, 6);
+                    zle_ctx.fillStyle = zle_lay.zle_soft;
+                    zle_ctx.fill();
+                    zle_ctx.strokeStyle = "rgba(31,45,61,0.12)";
+                    zle_ctx.lineWidth = 1;
+                    zle_ctx.stroke();
+                    zle_ctx.fillStyle = "#2b3d52";
+                    zle_ctx.font = "13px 'Microsoft YaHei', sans-serif";
+                    zle_ctx.textAlign = "center";
+                    zle_ctx.fillText(zle_lay.zle_items[zle_j], zle_cx + zle_chipW / 2, zle_cy + zle_chipH / 2 + 1);
+                    zle_geom.push({ zle_type: "item", zle_index: zle_i, zle_item: zle_j, zle_x: zle_cx, zle_y: zle_cy, zle_w: zle_chipW, zle_h: zle_chipH });
+                }
+
+                /* 层间箭头与标签 */
+                if (zle_i < zle_layers.length - 1) {
+                    var zle_gy1 = zle_y + zle_layerH, zle_gy2 = zle_gy1 + zle_gap;
+                    var zle_downX = zle_cw * 0.30, zle_upX = zle_cw * 0.70;
+                    zle_arrow(zle_downX, zle_gy1 + 6, zle_downX, zle_gy2 - 6, "#94a3b8");
+                    zle_arrow(zle_upX, zle_gy2 - 6, zle_upX, zle_gy1 + 6, "#c2ccd8");
+                    zle_ctx.fillStyle = "#5b6b7c";
+                    zle_ctx.font = "12px 'Microsoft YaHei', sans-serif";
+                    zle_ctx.textAlign = "center";
+                    zle_ctx.fillText("↓ 调用　" + zle_gapLabels[zle_i], zle_cw / 2, (zle_gy1 + zle_gy2) / 2);
+                }
+            }
+
+            /* 底部注脚 */
+            zle_ctx.fillStyle = "#8496ab";
+            zle_ctx.font = "12px 'Microsoft YaHei', sans-serif";
+            zle_ctx.textAlign = "center";
+            zle_ctx.fillText("自上而下逐层调用，自下而上经中断与驱动返回数据", zle_cw / 2, zle_top + 4 * zle_layerH + 3 * zle_gap + 18);
+        }
+
+        /* ---------- 交互：命中检测 ---------- */
+        zle_canvas.addEventListener("mousemove", function (zle_ev) {
+            var zle_rect = zle_canvas.getBoundingClientRect();
+            var zle_mx = (zle_ev.clientX - zle_rect.left) * (zle_cw / zle_rect.width);
+            var zle_my = (zle_ev.clientY - zle_rect.top) * (zle_ch / zle_rect.height);
+            var zle_hit = null;
+            for (var zle_i = zle_geom.length - 1; zle_i >= 0; zle_i--) {
+                var zle_g = zle_geom[zle_i];
+                if (zle_mx >= zle_g.zle_x && zle_mx <= zle_g.zle_x + zle_g.zle_w &&
+                    zle_my >= zle_g.zle_y && zle_my <= zle_g.zle_y + zle_g.zle_h) {
+                    zle_hit = zle_g;
+                    break;
+                }
+            }
+            var zle_key = zle_hit ? zle_hit.zle_type + zle_hit.zle_index + (zle_hit.zle_item !== undefined ? "_" + zle_hit.zle_item : "") : "";
+            if (zle_key !== zle_hover) {
+                zle_hover = zle_hit ? zle_key : null;
+                zle_canvas.style.cursor = zle_hit ? "pointer" : "default";
+                zle_draw();
+                zle_showTip(zle_hit);
+            }
+        });
+
+        zle_canvas.addEventListener("mouseleave", function () {
+            zle_hover = null;
+            zle_draw();
+            document.getElementById("zle_tip").innerHTML = "鼠标悬停在架构图任意色块上，这里会显示该模块的职责说明。";
+        });
+
+        function zle_showTip(zle_hit) {
+            var zle_tip = document.getElementById("zle_tip");
+            if (!zle_hit) { return; }
+            var zle_lay = zle_layers[zle_hit.zle_index];
+            if (zle_hit.zle_type === "layer") {
+                zle_tip.innerHTML = "<b>" + zle_lay.zle_name + "</b>：" + zle_lay.zle_desc;
+            } else {
+                var zle_item = zle_lay.zle_items[zle_hit.zle_item];
+                zle_tip.innerHTML = "<b>" + zle_item + "</b>（" + zle_lay.zle_name + "）：" + zle_lay.zle_desc;
+            }
+        }
+
+        zle_draw();
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 14:25 | 使用大模型：GLM-5.3-Flash | 功能名称：Three.js 3D 图表（柱状图 + 散点图） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 3D 图表：柱状图与散点图 | 张珑恩</title>
+    <script src="cdn/three.min.js"></script>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(64rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .zle_btn {
+            padding: 0.45rem 1.2rem;
+            font-size: 0.9rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .zle_btn.zle_btn_ghost {
+            color: var(--zle_ink);
+            background: #e6ecf5;
+        }
+
+        .zle_hint {
+            margin-left: auto;
+            font-size: 0.82rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_charts {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+        }
+
+        .zle_panel {
+            padding: clamp(0.8rem, 2vw, 1.2rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+            position: relative;
+        }
+
+        .zle_panel h2 {
+            margin: 0 0 0.4rem;
+            font-size: 1.05rem;
+        }
+
+        .zle_panel > p {
+            margin: 0 0 0.6rem;
+            font-size: 0.82rem;
+            color: var(--zle_muted);
+        }
+
+        #zle_bar3d,
+        #zle_scatter3d {
+            width: 100%;
+            height: 24rem;
+            border-radius: 0.7rem;
+            background: #0f172a;
+            display: block;
+            touch-action: none;
+        }
+
+        .zle_tooltip {
+            position: absolute;
+            display: none;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.8rem;
+            color: #fff;
+            background: rgb(15 23 42 / 88%);
+            border-radius: 0.4rem;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        .zle_note {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_note code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            /* 自动旋转由 JS 检测后默认关闭 */
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>Three.js 3D 图表：柱状图 + 散点图</h1>
+            <p>Three.js r128 已下载到本地 <code>cdn/three.min.js</code>，相对路径引入，离线渲染。拖拽旋转视角，滚轮缩放，悬停柱体/数据点可查看数值。</p>
+        </header>
+
+        <div class="zle_toolbar">
+            <button id="zle_spin" class="zle_btn" type="button">自动旋转：开</button>
+            <button id="zle_reset_cam" class="zle_btn zle_btn_ghost" type="button">重置视角</button>
+            <span class="zle_hint">鼠标拖拽旋转 · 滚轮缩放 · 悬停查看数值</span>
+        </div>
+
+        <div class="zle_charts">
+            <section class="zle_panel" aria-label="3D 柱状图">
+                <h2>① 3D 柱状图：全年月度销售额</h2>
+                <p>12 根柱体高度对应销售额（万元），颜色由低到高渐变。</p>
+                <canvas id="zle_bar3d"></canvas>
+                <div id="zle_bar_tip" class="zle_tooltip"></div>
+            </section>
+
+            <section class="zle_panel" aria-label="3D 散点图">
+                <h2>② 3D 散点图：随机数据立方分布</h2>
+                <p>150 个数据点分布在 10×10 网格上，高度与颜色表示数值大小。</p>
+                <canvas id="zle_scatter3d"></canvas>
+                <div id="zle_scatter_tip" class="zle_tooltip"></div>
+            </section>
+        </div>
+
+        <div class="zle_note">
+            技术要点：<code>THREE.Scene / PerspectiveCamera / WebGLRenderer</code> 三件套；
+            <code>MeshPhongMaterial</code> + 两盏方向光营造立体感；
+            <code>Raycaster</code> 实现鼠标拾取与悬浮提示；
+            <code>requestAnimationFrame</code> 渲染循环；自研拖拽旋转（绕 Y 轴 + 俯仰角限制）与滚轮缩放，未依赖 OrbitControls 附加库。
+        </div>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · Three.js（本地 cdn 目录）
+        </footer>
+    </div>
+
+    <script>
+        var zle_reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var zle_autoSpin = !zle_reduced;
+        var zle_spinBtn = document.getElementById("zle_spin");
+        zle_spinBtn.textContent = "自动旋转：" + (zle_autoSpin ? "开" : "关");
+
+        /* ---------- 通用场景工厂 ---------- */
+        function zle_createScene(zle_canvasId, zle_camPos) {
+            var zle_canvas = document.getElementById(zle_canvasId);
+            var zle_renderer = new THREE.WebGLRenderer({ canvas: zle_canvas, antialias: true });
+            var zle_scene = new THREE.Scene();
+            zle_scene.background = new THREE.Color(0x0f172a);
+
+            var zle_camera = new THREE.PerspectiveCamera(45, 2, 0.1, 200);
+            zle_camera.position.set(zle_camPos[0], zle_camPos[1], zle_camPos[2]);
+            zle_camera.lookAt(0, 0, 0);
+
+            var zle_light1 = new THREE.DirectionalLight(0xffffff, 0.85);
+            zle_light1.position.set(20, 30, 15);
+            var zle_light2 = new THREE.DirectionalLight(0x88aaff, 0.35);
+            zle_light2.position.set(-15, 10, -20);
+            zle_scene.add(zle_light1, zle_light2, new THREE.AmbientLight(0xffffff, 0.35));
+
+            /* 自研轨道控制：拖拽绕 Y 轴旋转 + 俯仰限制 + 滚轮缩放 */
+            var zle_orbit = { zle_theta: Math.PI / 5, zle_phi: Math.PI / 4, zle_dist: Math.hypot(zle_camPos[0], zle_camPos[1], zle_camPos[2]), zle_target: new THREE.Vector3(0, 0, 0) };
+            var zle_dragging = false, zle_lastX = 0, zle_lastY = 0;
+
+            function zle_applyCamera() {
+                zle_camera.position.set(
+                    zle_orbit.zle_target.x + zle_orbit.zle_dist * Math.sin(zle_orbit.zle_phi) * Math.sin(zle_orbit.zle_theta),
+                    zle_orbit.zle_target.y + zle_orbit.zle_dist * Math.cos(zle_orbit.zle_phi),
+                    zle_orbit.zle_target.z + zle_orbit.zle_dist * Math.sin(zle_orbit.zle_phi) * Math.cos(zle_orbit.zle_theta)
+                );
+                zle_camera.lookAt(zle_orbit.zle_target);
+            }
+            zle_applyCamera();
+
+            zle_canvas.addEventListener("pointerdown", function (zle_e) {
+                zle_dragging = true;
+                zle_lastX = zle_e.clientX;
+                zle_lastY = zle_e.clientY;
+                zle_canvas.setPointerCapture(zle_e.pointerId);
+            });
+            zle_canvas.addEventListener("pointermove", function (zle_e) {
+                if (!zle_dragging) { return; }
+                zle_orbit.zle_theta -= (zle_e.clientX - zle_lastX) * 0.01;
+                zle_orbit.zle_phi = Math.max(0.15, Math.min(1.45, zle_orbit.zle_phi - (zle_e.clientY - zle_lastY) * 0.008));
+                zle_lastX = zle_e.clientX;
+                zle_lastY = zle_e.clientY;
+                zle_applyCamera();
+            });
+            zle_canvas.addEventListener("pointerup", function () { zle_dragging = false; });
+            zle_canvas.addEventListener("wheel", function (zle_e) {
+                zle_e.preventDefault();
+                zle_orbit.zle_dist = Math.max(8, Math.min(80, zle_orbit.zle_dist + zle_e.deltaY * 0.02));
+                zle_applyCamera();
+            }, { passive: false });
+
+            function zle_resize() {
+                var zle_w = zle_canvas.clientWidth, zle_h = zle_canvas.clientHeight;
+                zle_renderer.setSize(zle_w, zle_h, false);
+                zle_camera.aspect = zle_w / zle_h;
+                zle_camera.updateProjectionMatrix();
+            }
+            window.addEventListener("resize", zle_resize);
+            zle_resize();
+
+            return { zle_canvas: zle_canvas, zle_renderer: zle_renderer, zle_scene: zle_scene, zle_camera: zle_camera, zle_orbit: zle_orbit, zle_applyCamera: zle_applyCamera };
+        }
+
+        /* ================= ① 3D 柱状图 ================= */
+        var zle_barView = zle_createScene("zle_bar3d", [18, 16, 18]);
+        var zle_barMonths = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+        var zle_barValues = [86, 92, 78, 105, 118, 132, 125, 141, 156, 149, 168, 182];
+        var zle_barMeshes = [];
+        var zle_barGroup = new THREE.Group();
+        var zle_maxV = Math.max.apply(null, zle_barValues);
+
+        var zle_barGeo = new THREE.BoxGeometry(1.2, 1, 1.2);
+        for (var zle_i = 0; zle_i < zle_barValues.length; zle_i++) {
+            var zle_h = zle_barValues[zle_i] / zle_maxV * 10 + 0.6;
+            var zle_t = zle_barValues[zle_i] / zle_maxV;
+            var zle_color = new THREE.Color().setHSL(0.62 - 0.62 * zle_t, 0.75, 0.55);  /* 蓝→红渐变 */
+            var zle_mat = new THREE.MeshPhongMaterial({ color: zle_color, shininess: 60 });
+            var zle_mesh = new THREE.Mesh(zle_barGeo, zle_mat);
+            zle_mesh.scale.y = zle_h;
+            zle_mesh.position.set(zle_i * 1.9 - 10.5, zle_h / 2, 0);
+            zle_mesh.userData = { zle_label: zle_barMonths[zle_i], zle_value: zle_barValues[zle_i] };
+            zle_barGroup.add(zle_mesh);
+            zle_barMeshes.push(zle_mesh);
+        }
+        zle_barView.zle_scene.add(zle_barGroup);
+        zle_barView.zle_scene.add(new THREE.GridHelper(26, 13, 0x334766, 0x1e2c44));
+
+        var zle_barRaycaster = new THREE.Raycaster();
+        var zle_barMouse = new THREE.Vector2();
+        var zle_barTip = document.getElementById("zle_bar_tip");
+        var zle_barHover = null;
+
+        zle_barView.zle_canvas.addEventListener("pointermove", function (zle_e) {
+            var zle_rect = zle_barView.zle_canvas.getBoundingClientRect();
+            zle_barMouse.x = ((zle_e.clientX - zle_rect.left) / zle_rect.width) * 2 - 1;
+            zle_barMouse.y = -((zle_e.clientY - zle_rect.top) / zle_rect.height) * 2 + 1;
+            zle_barRaycaster.setFromCamera(zle_barMouse, zle_barView.zle_camera);
+            var zle_hits = zle_barRaycaster.intersectObjects(zle_barMeshes);
+            var zle_hit = zle_hits.length > 0 ? zle_hits[0].object : null;
+            if (zle_hit !== zle_barHover) {
+                if (zle_barHover) { zle_barHover.material.emissive.setHex(0x000000); }
+                zle_barHover = zle_hit;
+                if (zle_hit) {
+                    zle_hit.material.emissive.setHex(0x333333);
+                    zle_barTip.textContent = zle_hit.userData.zle_label + "：" + zle_hit.userData.zle_value + " 万元";
+                    zle_barTip.style.display = "block";
+                } else {
+                    zle_barTip.style.display = "none";
+                }
+            }
+            if (zle_hit) {
+                var zle_canvasRect = zle_barView.zle_canvas.getBoundingClientRect();
+                zle_barTip.style.left = (zle_e.clientX - zle_canvasRect.left + 14) + "px";
+                zle_barTip.style.top = (zle_e.clientY - zle_canvasRect.top - 30) + "px";
+            }
+        });
+        zle_barView.zle_canvas.addEventListener("pointerleave", function () {
+            if (zle_barHover) { zle_barHover.material.emissive.setHex(0x000000); }
+            zle_barHover = null;
+            zle_barTip.style.display = "none";
+        });
+
+        /* ================= ② 3D 散点图 ================= */
+        var zle_scView = zle_createScene("zle_scatter3d", [20, 14, 20]);
+        var zle_scGroup = new THREE.Group();
+        var zle_scPoints = [];
+        var zle_scSphereGeo = new THREE.SphereGeometry(0.32, 16, 16);
+
+        /* 固定种子伪随机，保证每次刷新图形一致 */
+        var zle_seed = 42;
+        function zle_rand() {
+            zle_seed = (zle_seed * 9301 + 49297) % 233280;
+            return zle_seed / 233280;
+        }
+
+        for (var zle_n = 0; zle_n < 150; zle_n++) {
+            var zle_gx = zle_rand() * 14 - 7, zle_gz = zle_rand() * 14 - 7;
+            var zle_val = Math.sin(zle_gx * 0.55) * Math.cos(zle_gz * 0.55) * 4 + 4 + zle_rand() * 1.5;  /* 波面 + 噪声 */
+            var zle_scColor = new THREE.Color().setHSL(0.45 - 0.35 * (zle_val / 8), 0.8, 0.6);
+            var zle_scMesh = new THREE.Mesh(zle_scSphereGeo, new THREE.MeshPhongMaterial({ color: zle_scColor, shininess: 80 }));
+            zle_scMesh.position.set(zle_gx, zle_val, zle_gz);
+            zle_scMesh.scale.setScalar(0.6 + zle_val / 8);
+            zle_scMesh.userData = { zle_value: zle_val.toFixed(2) };
+            zle_scGroup.add(zle_scMesh);
+            zle_scPoints.push(zle_scMesh);
+        }
+        zle_scView.zle_scene.add(zle_scGroup);
+        zle_scView.zle_scene.add(new THREE.GridHelper(20, 10, 0x334766, 0x1e2c44));
+
+        var zle_scRaycaster = new THREE.Raycaster();
+        var zle_scMouse = new THREE.Vector2();
+        var zle_scTip = document.getElementById("zle_scatter_tip");
+
+        document.getElementById("zle_scatter3d").addEventListener("pointermove", function (zle_e) {
+            var zle_rect = this.getBoundingClientRect();
+            zle_scMouse.x = ((zle_e.clientX - zle_rect.left) / zle_rect.width) * 2 - 1;
+            zle_scMouse.y = -((zle_e.clientY - zle_rect.top) / zle_rect.height) * 2 + 1;
+            zle_scRaycaster.setFromCamera(zle_scMouse, zle_scView.zle_camera);
+            var zle_hits = zle_scRaycaster.intersectObjects(zle_scPoints);
+            if (zle_hits.length > 0) {
+                zle_scTip.textContent = "数值：" + zle_hits[0].object.userData.zle_value;
+                zle_scTip.style.display = "block";
+                zle_scTip.style.left = (zle_e.clientX - zle_rect.left + 14) + "px";
+                zle_scTip.style.top = (zle_e.clientY - zle_rect.top - 30) + "px";
+            } else {
+                zle_scTip.style.display = "none";
+            }
+        });
+        document.getElementById("zle_scatter3d").addEventListener("pointerleave", function () {
+            zle_scTip.style.display = "none";
+        });
+
+        /* ---------- 渲染循环 ---------- */
+        function zle_loop() {
+            if (zle_autoSpin && !zle_reduced) {
+                zle_barGroup.rotation.y += 0.0035;
+                zle_scGroup.rotation.y += 0.0035;
+            }
+            zle_barView.zle_renderer.render(zle_barView.zle_scene, zle_barView.zle_camera);
+            zle_scView.zle_renderer.render(zle_scView.zle_scene, zle_scView.zle_camera);
+            requestAnimationFrame(zle_loop);
+        }
+        zle_loop();
+
+        zle_spinBtn.addEventListener("click", function () {
+            zle_autoSpin = !zle_autoSpin;
+            this.textContent = "自动旋转：" + (zle_autoSpin ? "开" : "关");
+        });
+
+        document.getElementById("zle_reset_cam").addEventListener("click", function () {
+            [zle_barView, zle_scView].forEach(function (zle_v) {
+                zle_v.zle_orbit.zle_theta = Math.PI / 5;
+                zle_v.zle_orbit.zle_phi = zle_v === zle_barView ? Math.PI / 4 : Math.PI / 4;
+                zle_v.zle_orbit.zle_dist = zle_v === zle_barView ? 30 : 28;
+                zle_v.zle_applyCamera();
+            });
+        });
+    </script>
+</body>
+</html>

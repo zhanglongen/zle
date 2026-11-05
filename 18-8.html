@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 14:35 | 使用大模型：GLM-5.3-Flash | 功能名称：智能客服数据大屏（ECharts，中国地图 + 多图表三列布局） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能客服数据大屏 | 张珑恩</title>
+    <script src="cdn/echarts.min.js"></script>
+    <style>
+        :root {
+            --zle_bg: #0a1226;
+            --zle_panel: rgb(18 34 62 / 78%);
+            --zle_line: rgb(64 120 200 / 35%);
+            --zle_ink: #d8e6ff;
+            --zle_muted: #7d9bc8;
+            --zle_accent: #33c6ff;
+            --zle_accent2: #ffd166;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(0.8rem, 2vw, 1.4rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.5;
+            color: var(--zle_ink);
+            background:
+                radial-gradient(75rem 40rem at 50% -10%, rgb(38 84 158 / 40%), transparent 65%),
+                var(--zle_bg);
+        }
+
+        .zle_page {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            min-height: calc(100vh - 2.8rem);
+        }
+
+        .zle_topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 1.2rem;
+            background: var(--zle_panel);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.7rem;
+        }
+
+        .zle_topbar h1 {
+            margin: 0;
+            font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+            letter-spacing: 0.35em;
+            color: #fff;
+            text-shadow: 0 0 18px rgb(51 198 255 / 65%);
+        }
+
+        .zle_topbar .zle_side {
+            display: flex;
+            gap: 1.2rem;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_topbar b {
+            color: var(--zle_accent);
+            font-weight: 400;
+        }
+
+        .zle_grid {
+            display: grid;
+            gap: 0.9rem;
+            grid-template-columns: 1fr 1.55fr 1fr;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .zle_col {
+            display: grid;
+            gap: 0.9rem;
+            grid-template-rows: 1fr 1fr;
+            min-height: 0;
+        }
+
+        .zle_col.zle_mid {
+            grid-template-rows: 1.65fr 1fr;
+        }
+
+        .zle_cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 12rem;
+            padding: 0.55rem 0.8rem;
+            background: var(--zle_panel);
+            border: 1px solid var(--zle_line);
+            border-radius: 0.7rem;
+        }
+
+        .zle_cell h2 {
+            margin: 0 0 0.3rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--zle_accent);
+            border-left: 0.2rem solid var(--zle_accent2);
+            padding-left: 0.5rem;
+        }
+
+        .zle_chart {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .zle_footer {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--zle_muted);
+        }
+
+        @media (max-width: 64rem) {
+            .zle_grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_topbar">
+            <h1>智能客服数据大屏</h1>
+            <div class="zle_side">
+                <span>今日咨询 <b id="zle_kpi_today">2,847</b></span>
+                <span>机器人解决率 <b id="zle_kpi_rate">87.4%</b></span>
+                <span id="zle_clock">--:--:--</span>
+            </div>
+        </header>
+
+        <main class="zle_grid">
+            <div class="zle_col">
+                <section class="zle_cell">
+                    <h2>省份销售额 TOP8</h2>
+                    <div id="zle_chart_prov" class="zle_chart"></div>
+                </section>
+                <section class="zle_cell">
+                    <h2>近 30 日咨询趋势</h2>
+                    <div id="zle_chart_trend" class="zle_chart"></div>
+                </section>
+            </div>
+
+            <div class="zle_col zle_mid">
+                <section class="zle_cell">
+                    <h2>全国服务网点分布（地理信息图）</h2>
+                    <div id="zle_chart_map" class="zle_chart"></div>
+                </section>
+                <section class="zle_cell">
+                    <h2>实时咨询量（24 小时）</h2>
+                    <div id="zle_chart_hour" class="zle_chart"></div>
+                </section>
+            </div>
+
+            <div class="zle_col">
+                <section class="zle_cell">
+                    <h2>咨询问题类型占比</h2>
+                    <div id="zle_chart_pie" class="zle_chart"></div>
+                </section>
+                <section class="zle_cell">
+                    <h2>服务质量指标</h2>
+                    <div id="zle_chart_radar" class="zle_chart"></div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · ECharts 数据大屏（echarts.min.js 与 china.json 均在本地 cdn 目录）
+        </footer>
+    </div>
+
+    <script>
+        var zle_darkAxis = { axisLine: { lineStyle: { color: "#33507e" } }, axisLabel: { color: "#7d9bc8", fontSize: 10 } };
+
+        /* ---------- 顶部时钟与 KPI 微动 ---------- */
+        setInterval(function () {
+            var zle_now = new Date();
+            document.getElementById("zle_clock").textContent =
+                ("0" + zle_now.getHours()).slice(-2) + ":" + ("0" + zle_now.getMinutes()).slice(-2) + ":" + ("0" + zle_now.getSeconds()).slice(-2);
+        }, 1000);
+        setInterval(function () {
+            document.getElementById("zle_kpi_today").textContent = (2800 + Math.floor(Math.random() * 90)).toLocaleString();
+            document.getElementById("zle_kpi_rate").textContent = (86.5 + Math.random()).toFixed(1) + "%";
+        }, 3000);
+
+        /* ---------- ① 地理信息图：中国地图 + 服务网点涟漪散点 ---------- */
+        var zle_mapChart = echarts.init(document.getElementById("zle_chart_map"));
+        fetch("cdn/china.json")
+            .then(function (zle_res) { return zle_res.json(); })
+            .then(function (zle_geo) {
+                echarts.registerMap("china", zle_geo);
+                zle_mapChart.setOption({
+                    tooltip: { trigger: "item" },
+                    visualMap: {
+                        min: 0, max: 3000, left: 10, bottom: 10,
+                        text: ["高", "低"], textStyle: { color: "#7d9bc8", fontSize: 10 },
+                        inRange: { color: ["#123a6e", "#1f6fc4", "#33c6ff"] },
+                        calculable: false
+                    },
+                    series: [
+                        {
+                            name: "各省咨询量",
+                            type: "map",
+                            map: "china",
+                            roam: true,
+                            itemStyle: { borderColor: "rgba(120,180,255,0.55)", borderWidth: 0.6 },
+                            label: { show: false },
+                            emphasis: { label: { show: true, color: "#fff" }, itemStyle: { areaColor: "#ffd166" } },
+                            data: [
+                                { name: "广东省", value: 2860 }, { name: "北京市", value: 2410 },
+                                { name: "上海市", value: 2280 }, { name: "江苏省", value: 1950 },
+                                { name: "浙江省", value: 1870 }, { name: "四川省", value: 1420 },
+                                { name: "山东省", value: 1310 }, { name: "湖北省", value: 1180 },
+                                { name: "河南省", value: 1090 }, { name: "福建省", value: 970 },
+                                { name: "湖南省", value: 880 }, { name: "陕西省", value: 760 }
+                            ]
+                        },
+                        {
+                            name: "服务中心",
+                            type: "effectScatter",
+                            coordinateSystem: "geo",
+                            symbolSize: 9,
+                            rippleEffect: { brushType: "stroke", scale: 3.2 },
+                            label: { show: true, position: "right", formatter: "{b}", color: "#d8e6ff", fontSize: 10 },
+                            itemStyle: { color: "#ffd166", shadowBlur: 12, shadowColor: "#ffd166" },
+                            data: [
+                                { name: "北京中心", value: [116.4, 39.9, 100] },
+                                { name: "上海中心", value: [121.47, 31.23, 90] },
+                                { name: "广州中心", value: [113.26, 23.13, 85] },
+                                { name: "成都中心", value: [104.06, 30.57, 70] },
+                                { name: "西安中心", value: [108.94, 34.34, 60] }
+                            ]
+                        }
+                    ],
+                    geo: {
+                        map: "china",
+                        roam: true,
+                        itemStyle: { areaColor: "transparent", borderColor: "rgba(120,180,255,0.2)" },
+                        emphasis: { disabled: true }
+                    }
+                });
+            })
+            .catch(function () {
+                document.getElementById("zle_chart_map").innerHTML = "<p style='color:#7d9bc8;padding:2rem'>地图数据 cdn/china.json 加载失败</p>";
+            });
+
+        /* ---------- ② 省份销售额 TOP8（柱状图） ---------- */
+        var zle_provChart = echarts.init(document.getElementById("zle_chart_prov"));
+        zle_provChart.setOption({
+            tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+            grid: { left: 80, right: 30, top: 10, bottom: 24 },
+            xAxis: { type: "value", splitLine: { lineStyle: { color: "rgb(64 120 200 / 18%)" } }, axisLabel: Object.assign({ fontSize: 9 }, zle_darkAxis.axisLabel) },
+            yAxis: {
+                type: "category",
+                data: ["重庆", "福建", "山东", "四川", "浙江", "江苏", "上海", "广东"],
+                axisLine: zle_darkAxis.axisLine, axisLabel: Object.assign({ fontSize: 10 }, zle_darkAxis.axisLabel)
+            },
+            series: [{
+                type: "bar",
+                barWidth: "55%",
+                data: [86, 92, 108, 121, 154, 168, 201, 243],
+                label: { show: true, position: "right", color: "#d8e6ff", fontSize: 9 },
+                itemStyle: {
+                    borderRadius: 4,
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: "#1f6fc4" }, { offset: 1, color: "#33c6ff" }
+                    ])
+                }
+            }]
+        });
+
+        /* ---------- ③ 近 30 日咨询趋势（折线图） ---------- */
+        var zle_days = [], zle_vals = [];
+        for (var zle_d = 29; zle_d >= 0; zle_d--) {
+            var zle_date = new Date(Date.now() - zle_d * 86400000);
+            zle_days.push((zle_date.getMonth() + 1) + "/" + zle_date.getDate());
+            zle_vals.push(2200 + Math.round(Math.sin(zle_d / 4) * 260 + zle_d * 18 + Math.random() * 120));
+        }
+        var zle_trendChart = echarts.init(document.getElementById("zle_chart_trend"));
+        zle_trendChart.setOption({
+            tooltip: { trigger: "axis" },
+            grid: { left: 46, right: 20, top: 16, bottom: 24 },
+            xAxis: Object.assign({ type: "category", data: zle_days, boundaryGap: false }, zle_darkAxis, { axisLabel: Object.assign({ fontSize: 9 }, zle_darkAxis.axisLabel) }),
+            yAxis: Object.assign({ type: "value", splitLine: { lineStyle: { color: "rgb(64 120 200 / 18%)" } } }, zle_darkAxis),
+            series: [{
+                name: "咨询量",
+                type: "line",
+                data: zle_vals,
+                smooth: true,
+                symbol: "none",
+                lineStyle: { color: "#33c6ff", width: 2 },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: "rgb(51 198 255 / 45%)" }, { offset: 1, color: "rgb(51 198 255 / 2%)" }
+                    ])
+                }
+            }]
+        });
+
+        /* ---------- ④ 实时咨询量（24 小时面积图） ---------- */
+        var zle_hours = [], zle_hourVals = [];
+        for (var zle_h = 0; zle_h < 24; zle_h++) {
+            zle_hours.push(("0" + zle_h).slice(-2) + "时");
+            var zle_base = zle_h >= 9 && zle_h <= 18 ? 260 : 70;
+            zle_hourVals.push(Math.round(zle_base + Math.sin(zle_h / 3) * 60 + Math.random() * 50));
+        }
+        var zle_hourChart = echarts.init(document.getElementById("zle_chart_hour"));
+        zle_hourChart.setOption({
+            tooltip: { trigger: "axis" },
+            grid: { left: 46, right: 20, top: 16, bottom: 24 },
+            xAxis: Object.assign({ type: "category", data: zle_hours, boundaryGap: false }, zle_darkAxis, { axisLabel: Object.assign({ fontSize: 9, interval: 3 }, zle_darkAxis.axisLabel) }),
+            yAxis: Object.assign({ type: "value", splitLine: { lineStyle: { color: "rgb(64 120 200 / 18%)" } } }, zle_darkAxis),
+            series: [{
+                name: "实时咨询",
+                type: "bar",
+                data: zle_hourVals,
+                barWidth: "55%",
+                itemStyle: {
+                    borderRadius: [4, 4, 0, 0],
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: "#ffd166" }, { offset: 1, color: "rgb(255 209 102 / 15%)" }
+                    ])
+                }
+            }]
+        });
+
+        /* ---------- ⑤ 问题类型占比（环形饼图） ---------- */
+        var zle_pieChart = echarts.init(document.getElementById("zle_chart_pie"));
+        zle_pieChart.setOption({
+            tooltip: { trigger: "item", formatter: "{b}<br/>{c} 单（{d}%）" },
+            legend: { bottom: 4, textStyle: { color: "#7d9bc8", fontSize: 10 }, itemWidth: 12, itemHeight: 8 },
+            series: [{
+                type: "pie",
+                radius: ["42%", "68%"],
+                center: ["50%", "44%"],
+                label: { color: "#d8e6ff", fontSize: 10, formatter: "{b} {d}%" },
+                itemStyle: { borderColor: "#0a1226", borderWidth: 2 },
+                data: [
+                    { value: 980, name: "订单查询" },
+                    { value: 720, name: "售后退换" },
+                    { value: 540, name: "产品咨询" },
+                    { value: 380, name: "物流配送" },
+                    { value: 227, name: "账户问题" }
+                ],
+                color: ["#33c6ff", "#ffd166", "#8be0c0", "#b48bff", "#f38ba8"]
+            }]
+        });
+
+        /* ---------- ⑥ 服务质量指标（雷达图） ---------- */
+        var zle_radarChart = echarts.init(document.getElementById("zle_chart_radar"));
+        zle_radarChart.setOption({
+            tooltip: {},
+            radar: {
+                indicator: [
+                    { name: "解决率", max: 100 }, { name: "响应速度", max: 100 },
+                    { name: "满意度", max: 100 }, { name: "知识覆盖率", max: 100 },
+                    { name: "转人工率", max: 100 }, { name: "复购意向", max: 100 }
+                ],
+                radius: "62%",
+                axisName: { color: "#7d9bc8", fontSize: 10 },
+                splitLine: { lineStyle: { color: "rgb(64 120 200 / 30%)" } },
+                splitArea: { show: false },
+                axisLine: { lineStyle: { color: "rgb(64 120 200 / 40%)" } }
+            },
+            series: [{
+                type: "radar",
+                data: [
+                    {
+                        value: [87, 92, 89, 78, 34, 71],
+                        name: "本月",
+                        areaStyle: { color: "rgb(51 198 255 / 25%)" },
+                        lineStyle: { color: "#33c6ff" },
+                        itemStyle: { color: "#33c6ff" }
+                    },
+                    {
+                        value: [74, 80, 82, 60, 48, 66],
+                        name: "上月",
+                        areaStyle: { color: "rgb(255 209 102 / 15%)" },
+                        lineStyle: { color: "#ffd166" },
+                        itemStyle: { color: "#ffd166" }
+                    }
+                ]
+            }],
+            legend: { bottom: 2, textStyle: { color: "#7d9bc8", fontSize: 10 }, itemWidth: 12, itemHeight: 8 }
+        });
+
+        window.addEventListener("resize", function () {
+            zle_mapChart.resize();
+            zle_provChart.resize();
+            zle_trendChart.resize();
+            zle_hourChart.resize();
+            zle_pieChart.resize();
+            zle_radarChart.resize();
+        });
+    </script>
+</body>
+</html>

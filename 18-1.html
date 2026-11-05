@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 13:34 | 使用大模型：GLM-5.3-Flash | 功能名称：Canvas 动画（粒子 + 文字“张珑恩”） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas 动画演示 | 张珑恩</title>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(58rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .zle_btn {
+            padding: 0.45rem 1.2rem;
+            font-size: 0.9rem;
+            color: #fff;
+            background: var(--zle_accent);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .zle_btn.zle_btn_ghost {
+            color: var(--zle_ink);
+            background: #e6ecf5;
+        }
+
+        .zle_btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .zle_fps {
+            margin-left: auto;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+        }
+
+        .zle_stage {
+            padding: 0.6rem;
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        #zle_canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 0.7rem;
+            background: #0f172a;
+        }
+
+        .zle_notes {
+            margin: 1.2rem 0 0;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_notes code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            /* 动画帧仍在绘制但只在暂停态呈现一帧，由 JS 检测后停帧 */
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>Canvas 动画：粒子环绕 + 发光文字</h1>
+            <p>用 <code>requestAnimationFrame</code> 逐帧重绘：上升的彩色粒子、环绕轨道光点、呼吸发光的“张珑恩”。</p>
+        </header>
+
+        <div class="zle_toolbar">
+            <button id="zle_toggle" class="zle_btn" type="button">暂停动画</button>
+            <button id="zle_reset" class="zle_btn zle_btn_ghost" type="button">重置粒子</button>
+            <span id="zle_fps" class="zle_fps">FPS: --</span>
+        </div>
+
+        <div class="zle_stage">
+            <canvas id="zle_canvas" width="960" height="540" role="img" aria-label="Canvas 动画：彩色粒子环绕发光文字张珑恩"></canvas>
+        </div>
+
+        <div class="zle_notes">
+            技术要点：<code>canvas.getContext("2d")</code> 绘制；
+            <code>requestAnimationFrame</code> 驱动逐帧动画；
+            <code>shadowBlur</code> + <code>createRadialGradient</code> 实现文字辉光；
+            <code>devicePixelRatio</code> 缩放保证高清屏不模糊；
+            系统开启“减少动态效果”时自动停帧只画静态一帧。
+        </div>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · 原生 HTML + CSS + JavaScript
+        </footer>
+    </div>
+
+    <script>
+        var zle_canvas = document.getElementById("zle_canvas");
+        var zle_ctx = zle_canvas.getContext("2d");
+        var zle_reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        var zle_w = 0, zle_h = 0;          /* CSS 像素尺寸 */
+        var zle_particles = [];
+        var zle_paused = false;
+        var zle_time = 0;
+        var zle_lastStamp = 0;
+        var zle_fpsFrames = 0, zle_fpsLast = 0;
+
+        function zle_resize() {
+            var zle_cssW = zle_canvas.clientWidth;
+            var zle_ratio = Math.min(window.devicePixelRatio || 1, 2);
+            zle_w = zle_cssW;
+            zle_h = zle_cssW * 0.56;
+            zle_canvas.style.height = zle_h + "px";
+            zle_canvas.width = Math.round(zle_cssW * zle_ratio);
+            zle_canvas.height = Math.round(zle_h * zle_ratio);
+            zle_ctx.setTransform(zle_ratio, 0, 0, zle_ratio, 0, 0);
+        }
+
+        function zle_makeParticles() {
+            zle_particles = [];
+            var zle_colors = ["#5ba0ff", "#8be0c0", "#ffd166", "#f38ba8", "#b48bff"];
+            for (var zle_i = 0; zle_i < 70; zle_i++) {
+                zle_particles.push({
+                    zle_x: Math.random() * zle_w,
+                    zle_y: Math.random() * zle_h,
+                    zle_r: 1 + Math.random() * 2.6,
+                    zle_vy: 0.25 + Math.random() * 0.75,
+                    zle_vx: (Math.random() - 0.5) * 0.35,
+                    zle_alpha: 0.25 + Math.random() * 0.55,
+                    zle_color: zle_colors[Math.floor(Math.random() * zle_colors.length)]
+                });
+            }
+        }
+
+        function zle_drawBackground() {
+            var zle_grad = zle_ctx.createLinearGradient(0, 0, 0, zle_h);
+            zle_grad.addColorStop(0, "#0f172a");
+            zle_grad.addColorStop(1, "#1c2c4d");
+            zle_ctx.fillStyle = zle_grad;
+            zle_ctx.fillRect(0, 0, zle_w, zle_h);
+        }
+
+        function zle_drawParticles() {
+            for (var zle_i = 0; zle_i < zle_particles.length; zle_i++) {
+                var zle_p = zle_particles[zle_i];
+                zle_ctx.globalAlpha = zle_p.zle_alpha;
+                zle_ctx.fillStyle = zle_p.zle_color;
+                zle_ctx.beginPath();
+                zle_ctx.arc(zle_p.zle_x, zle_p.zle_y, zle_p.zle_r, 0, Math.PI * 2);
+                zle_ctx.fill();
+
+                if (!zle_paused) {
+                    zle_p.zle_y -= zle_p.zle_vy;
+                    zle_p.zle_x += zle_p.zle_vx;
+                    if (zle_p.zle_y < -6) {
+                        zle_p.zle_y = zle_h + 6;
+                        zle_p.zle_x = Math.random() * zle_w;
+                    }
+                    if (zle_p.zle_x < -6) { zle_p.zle_x = zle_w + 6; }
+                    if (zle_p.zle_x > zle_w + 6) { zle_p.zle_x = -6; }
+                }
+            }
+            zle_ctx.globalAlpha = 1;
+        }
+
+        function zle_drawName() {
+            var zle_cx = zle_w / 2;
+            var zle_cy = zle_h / 2;
+            var zle_glow = 14 + Math.sin(zle_time / 28) * 9;  /* 呼吸辉光 */
+
+            /* 环绕轨道光点 */
+            for (var zle_k = 0; zle_k < 3; zle_k++) {
+                var zle_angle = zle_time / 90 + zle_k * (Math.PI * 2 / 3);
+                var zle_orbitX = zle_w * 0.21;
+                var zle_orbitY = zle_h * 0.22;
+                var zle_ox = zle_cx + Math.cos(zle_angle) * zle_orbitX;
+                var zle_oy = zle_cy + Math.sin(zle_angle) * zle_orbitY;
+                zle_ctx.fillStyle = ["#5ba0ff", "#ffd166", "#8be0c0"][zle_k];
+                zle_ctx.shadowColor = zle_ctx.fillStyle;
+                zle_ctx.shadowBlur = 12;
+                zle_ctx.beginPath();
+                zle_ctx.arc(zle_ox, zle_oy, 4, 0, Math.PI * 2);
+                zle_ctx.fill();
+                zle_ctx.shadowBlur = 0;
+                zle_ctx.strokeStyle = "rgba(148, 175, 220, 0.12)";
+                zle_ctx.beginPath();
+                zle_ctx.ellipse(zle_cx, zle_cy, zle_orbitX, zle_orbitY, 0, 0, Math.PI * 2);
+                zle_ctx.stroke();
+            }
+
+            /* 主标题：张珑恩 */
+            var zle_size = Math.min(zle_w * 0.14, zle_h * 0.34);
+            zle_ctx.font = "700 " + zle_size + "px 'Microsoft YaHei', sans-serif";
+            zle_ctx.textAlign = "center";
+            zle_ctx.textBaseline = "middle";
+            var zle_title = zle_ctx.createLinearGradient(zle_cx - zle_w * 0.25, zle_cy, zle_cx + zle_w * 0.25, zle_cy);
+            zle_title.addColorStop(0, "#8fc1ff");
+            zle_title.addColorStop(0.5, "#ffffff");
+            zle_title.addColorStop(1, "#8fe3c6");
+            zle_ctx.shadowColor = "rgba(91, 160, 255, 0.9)";
+            zle_ctx.shadowBlur = zle_glow;
+            zle_ctx.fillStyle = zle_title;
+            zle_ctx.fillText("张珑恩", zle_cx, zle_cy - zle_h * 0.03);
+
+            /* 副标题 */
+            zle_ctx.shadowColor = "rgba(0, 0, 0, 0)";
+            zle_ctx.shadowBlur = 0;
+            zle_ctx.font = Math.max(12, Math.min(zle_w * 0.022, 16)) + "px 'Microsoft YaHei', sans-serif";
+            zle_ctx.fillStyle = "rgba(190, 210, 240, 0.75)";
+            zle_ctx.fillText("高 级 网 页 设 计 · Canvas 动 画", zle_cx, zle_cy + zle_h * 0.19);
+
+            /* 底部横线装饰 */
+            zle_ctx.strokeStyle = "rgba(143, 195, 255, 0.35)";
+            zle_ctx.beginPath();
+            zle_ctx.moveTo(zle_cx - zle_w * 0.14, zle_cy + zle_h * 0.26);
+            zle_ctx.lineTo(zle_cx + zle_w * 0.14, zle_cy + zle_h * 0.26);
+            zle_ctx.stroke();
+        }
+
+        function zle_frame(zle_stamp) {
+            if (!zle_paused) { zle_time += 1; }
+
+            zle_fpsFrames++;
+            if (zle_stamp - zle_fpsLast >= 500) {
+                document.getElementById("zle_fps").textContent =
+                    "FPS: " + Math.round(zle_fpsFrames * 1000 / (zle_stamp - zle_fpsLast));
+                zle_fpsFrames = 0;
+                zle_fpsLast = zle_stamp;
+            }
+
+            zle_drawBackground();
+            zle_drawParticles();
+            zle_drawName();
+
+            if (!zle_paused && !zle_reduced) {
+                requestAnimationFrame(zle_frame);
+            }
+        }
+
+        function zle_startLoop() {
+            zle_lastStamp = 0;
+            requestAnimationFrame(zle_frame);
+        }
+
+        document.getElementById("zle_toggle").addEventListener("click", function () {
+            zle_paused = !zle_paused;
+            this.textContent = zle_paused ? "继续动画" : "暂停动画";
+            if (!zle_paused) {
+                zle_startLoop();
+            }
+        });
+
+        document.getElementById("zle_reset").addEventListener("click", zle_makeParticles);
+
+        window.addEventListener("resize", function () {
+            zle_resize();
+            if (zle_paused || zle_reduced) {
+                zle_frame(performance.now());
+            }
+        });
+
+        zle_resize();
+        zle_makeParticles();
+        zle_startLoop();  /* reduced-motion 下画完第一帧即停，呈现静态画面 */
+    </script>
+</body>
+</html>

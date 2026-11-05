@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 张珑恩 | 建立时间：2026-11-05 13:55 | 使用大模型：GLM-5.3-Flash | 功能名称：ECharts 图表演示（K线图 + 桑基图） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts 图表：K线图与桑基图 | 张珑恩</title>
+    <script src="cdn/echarts.min.js"></script>
+    <style>
+        :root {
+            --zle_bg: #f4f7fb;
+            --zle_surface: #ffffff;
+            --zle_ink: #1f2d3d;
+            --zle_muted: #5b6b7c;
+            --zle_line: #dde6ef;
+            --zle_accent: #2f6fed;
+            --zle_radius: 1rem;
+            --zle_shadow: 0 0.75rem 1.75rem rgb(31 45 61 / 8%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--zle_ink);
+            background: var(--zle_bg);
+        }
+
+        .zle_page {
+            width: min(64rem, 100%);
+            margin: 0 auto;
+        }
+
+        .zle_header h1 {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 4vw, 2.1rem);
+        }
+
+        .zle_header p {
+            margin: 0 0 1.5rem;
+            color: var(--zle_muted);
+            font-size: 0.95rem;
+        }
+
+        .zle_charts {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+        }
+
+        .zle_panel {
+            padding: clamp(0.8rem, 2vw, 1.2rem);
+            background: var(--zle_surface);
+            border: 1px solid var(--zle_line);
+            border-radius: var(--zle_radius);
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_panel h2 {
+            margin: 0 0 0.4rem;
+            font-size: 1.05rem;
+        }
+
+        .zle_panel p {
+            margin: 0 0 0.6rem;
+            font-size: 0.82rem;
+            color: var(--zle_muted);
+        }
+
+        #zle_kchart,
+        #zle_sankey {
+            width: 100%;
+            height: 26rem;
+        }
+
+        .zle_note {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--zle_muted);
+            background: var(--zle_surface);
+            border-left: 0.25rem solid var(--zle_accent);
+            border-radius: 0.5rem;
+            box-shadow: var(--zle_shadow);
+        }
+
+        .zle_note code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--zle_accent);
+        }
+
+        .zle_footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--zle_muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="zle_page">
+        <header class="zle_header">
+            <h1>ECharts 图表演示：K线图 + 桑基图</h1>
+            <p>ECharts 库文件已下载到本地 <code>cdn/echarts.min.js</code>，以相对路径引入，离线可用。两张图数据均为内嵌数据，鼠标悬停可交互，K线图支持底部缩放条。</p>
+        </header>
+
+        <div class="zle_charts">
+            <section class="zle_panel" aria-label="K线图">
+                <h2>① K线图（Candlestick）</h2>
+                <p>某股票 30 个交易日的开盘/收盘/最低/最高价，红涨绿跌。</p>
+                <div id="zle_kchart"></div>
+            </section>
+
+            <section class="zle_panel" aria-label="桑基图">
+                <h2>② 桑基图（Sankey）</h2>
+                <p>仿官方 sankey-levels 示例：网站流量「来源 → 页面 → 行为 → 转化」四级流向。</p>
+                <div id="zle_sankey"></div>
+            </section>
+        </div>
+
+        <div class="zle_note">
+            说明：官方示例用 jQuery 的 <code>$.get(ROOT_PATH + '/data/asset/data/product.json')</code> 加载数据；
+            本页遵循项目“原生 fetch、不引第三方库”的规则，改用<b>内嵌数据对象</b>直接 <code>setOption</code>，效果一致且离线可运行。
+            参考示例：<a href="https://echarts.apache.org/examples/zh/editor.html?c=sankey-levels" target="_blank" rel="noopener">sankey-levels</a>。
+        </div>
+
+        <footer class="zle_footer">
+            高级网页设计 · 张珑恩 · ECharts（本地 cdn 目录）
+        </footer>
+    </div>
+
+    <script>
+        var zle_kChart = echarts.init(document.getElementById("zle_kchart"));
+        var zle_sankeyChart = echarts.init(document.getElementById("zle_sankey"));
+
+        /* ---------- ① K线图：30 个交易日的 OHLC 数据 ---------- */
+        var zle_kData = [
+            ["01-02", 20.1, 21.0, 19.9, 21.2],
+            ["01-03", 21.0, 20.6, 20.2, 21.4],
+            ["01-06", 20.6, 21.5, 20.5, 21.8],
+            ["01-07", 21.5, 22.3, 21.3, 22.6],
+            ["01-08", 22.3, 21.8, 21.4, 22.5],
+            ["01-09", 21.8, 22.6, 21.6, 22.9],
+            ["01-10", 22.6, 23.4, 22.4, 23.8],
+            ["01-13", 23.4, 22.9, 22.5, 23.6],
+            ["01-14", 22.9, 23.2, 22.6, 23.5],
+            ["01-15", 23.2, 22.4, 22.1, 23.3],
+            ["01-16", 22.4, 21.7, 21.3, 22.5],
+            ["01-17", 21.7, 22.2, 21.5, 22.6],
+            ["01-20", 22.2, 23.0, 22.0, 23.2],
+            ["01-21", 23.0, 23.8, 22.8, 24.1],
+            ["01-22", 23.8, 23.3, 22.9, 24.0],
+            ["01-23", 23.3, 22.6, 22.2, 23.5],
+            ["01-27", 22.6, 23.1, 22.4, 23.4],
+            ["01-28", 23.1, 22.5, 22.1, 23.3],
+            ["01-29", 22.5, 23.6, 22.4, 23.9],
+            ["01-30", 23.6, 24.5, 23.5, 24.8],
+            ["02-03", 24.5, 25.2, 24.3, 25.6],
+            ["02-04", 25.2, 24.7, 24.1, 25.4],
+            ["02-05", 24.7, 25.5, 24.6, 25.9],
+            ["02-06", 25.5, 26.3, 25.3, 26.6],
+            ["02-07", 26.3, 25.8, 25.4, 26.5],
+            ["02-10", 25.8, 26.6, 25.7, 27.0],
+            ["02-11", 26.6, 27.4, 26.4, 27.8],
+            ["02-12", 27.4, 26.9, 26.3, 27.6],
+            ["02-13", 26.9, 27.8, 26.8, 28.2],
+            ["02-14", 27.8, 28.5, 27.6, 28.9]
+        ];
+        var zle_kDates = zle_kData.map(function (zle_row) { return zle_row[0]; });
+        var zle_kOhlc = zle_kData.map(function (zle_row) { return [zle_row[1], zle_row[2], zle_row[3], zle_row[4]]; });
+
+        zle_kChart.setOption({
+            title: { text: "日K线（1月—2月）", left: "center", textStyle: { fontSize: 14 } },
+            tooltip: { trigger: "axis", axisPointer: { type: "cross" } },
+            grid: { left: "10%", right: "8%", top: "16%", bottom: "22%" },
+            xAxis: { type: "category", data: zle_kDates, boundaryGap: true, axisLine: { lineStyle: { color: "#8496ab" } } },
+            yAxis: { type: "value", scale: true, axisLine: { lineStyle: { color: "#8496ab" } }, splitLine: { lineStyle: { color: "#e6ecf5" } } },
+            dataZoom: [
+                { type: "inside", start: 0, end: 100 },
+                { show: true, type: "slider", top: "90%", start: 0, end: 100 }
+            ],
+            series: [{
+                name: "日K",
+                type: "candlestick",
+                data: zle_kOhlc,
+                itemStyle: {
+                    color: "#e15b64",        /* 阳线：红 */
+                    color0: "#1fa774",       /* 阴线：绿 */
+                    borderColor: "#e15b64",
+                    borderColor0: "#1fa774"
+                }
+            }]
+        });
+
+        /* ---------- ② 桑基图：仿官方 sankey-levels 示例（内嵌数据） ---------- */
+        zle_sankeyChart.setOption({
+            title: { text: "Sankey Diagram", left: "center", textStyle: { fontSize: 14 } },
+            tooltip: { trigger: "item", triggerOn: "mousemove" },
+            series: [{
+                type: "sankey",
+                layoutIterations: 32,
+                top: 40,
+                data: [
+                    { name: "直接访问" }, { name: "搜索引擎" }, { name: "社交媒体" },
+                    { name: "首页" }, { name: "商品页" }, { name: "文章页" },
+                    { name: "注册" }, { name: "浏览" }, { name: "加购" },
+                    { name: "下单" }, { name: "留资" }, { name: "流失" }
+                ],
+                links: [
+                    { source: "直接访问", target: "首页", value: 320 },
+                    { source: "直接访问", target: "文章页", value: 130 },
+                    { source: "搜索引擎", target: "首页", value: 180 },
+                    { source: "搜索引擎", target: "商品页", value: 260 },
+                    { source: "社交媒体", target: "文章页", value: 210 },
+                    { source: "社交媒体", target: "商品页", value: 90 },
+                    { source: "首页", target: "浏览", value: 300 },
+                    { source: "首页", target: "注册", value: 120 },
+                    { source: "首页", target: "流失", value: 80 },
+                    { source: "商品页", target: "加购", value: 210 },
+                    { source: "商品页", target: "浏览", value: 140 },
+                    { source: "文章页", target: "注册", value: 90 },
+                    { source: "文章页", target: "流失", value: 150 },
+                    { source: "注册", target: "下单", value: 100 },
+                    { source: "注册", target: "留资", value: 60 },
+                    { source: "注册", target: "流失", value: 50 },
+                    { source: "浏览", target: "下单", value: 70 },
+                    { source: "浏览", target: "流失", value: 230 },
+                    { source: "加购", target: "下单", value: 140 },
+                    { source: "加购", target: "流失", value: 70 }
+                ],
+                emphasis: { focus: "adjacency" },
+                levels: [
+                    { depth: 0, itemStyle: { color: "#fbb4ae" }, lineStyle: { color: "source", opacity: 0.6 } },
+                    { depth: 1, itemStyle: { color: "#b3cde3" }, lineStyle: { color: "source", opacity: 0.6 } },
+                    { depth: 2, itemStyle: { color: "#ccebc5" }, lineStyle: { color: "source", opacity: 0.6 } },
+                    { depth: 3, itemStyle: { color: "#decbe4" }, lineStyle: { color: "source", opacity: 0.6 } }
+                ],
+                lineStyle: { curveness: 0.5 }
+            }]
+        });
+
+        window.addEventListener("resize", function () {
+            zle_kChart.resize();
+            zle_sankeyChart.resize();
+        });
+    </script>
+</body>
+</html>
